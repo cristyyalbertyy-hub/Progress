@@ -9,7 +9,7 @@ import type { ProgressLevel } from '../data/course';
 
 interface DisciplineAccordionProps {
   groups: DisciplineGroup[];
-  activeSubDisciplineId: string;
+  activeSubDisciplineId: string | null;
   expandedGroupIds: Set<string>;
   progress: Record<string, ProgressLevel>;
   panelOpen: boolean;
@@ -35,7 +35,7 @@ export function DisciplineAccordion({
   const panelButtonLabel = panelOpen ? tr.ui.closePanel : tr.ui.viewProgress;
 
   const sidebarHint = !panelOpen
-    ? hasContent
+    ? !activeSubDisciplineId || hasContent
       ? tr.ui.selectDisciplineHint
       : tr.ui.placeholder
     : null;
@@ -89,7 +89,7 @@ function AccordionGroup({
   group: DisciplineGroup;
   groupTitle: string;
   isExpanded: boolean;
-  activeSubDisciplineId: string;
+  activeSubDisciplineId: string | null;
   progress: Record<string, ProgressLevel>;
   onToggle: () => void;
   onSelectSubDiscipline: (id: string) => void;

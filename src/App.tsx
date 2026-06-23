@@ -11,25 +11,25 @@ import {
 import { useProgress } from './hooks/useProgress';
 import './App.css';
 
-const DEFAULT_SUB_ID = 'statistics';
-
 function AppContent() {
   const { tr } = useLanguage();
   const { progress, cycleItem, resetAll, getLevel } = useProgress();
-  const [activeSubDisciplineId, setActiveSubDisciplineId] =
-    useState(DEFAULT_SUB_ID);
+  const [activeSubDisciplineId, setActiveSubDisciplineId] = useState<string | null>(
+    null,
+  );
   const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(
-    () => new Set(['physics-stats-info']),
+    () => new Set(),
   );
   const [panelOpen, setPanelOpen] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
 
-  const activeSubDiscipline =
-    findSubDiscipline(activeSubDisciplineId) ??
-    findSubDiscipline(DEFAULT_SUB_ID)!;
+  const activeSubDiscipline = activeSubDisciplineId
+    ? findSubDiscipline(activeSubDisciplineId)
+    : undefined;
 
-  const hasContent =
-    activeSubDiscipline.available && activeSubDiscipline.chapters.length > 0;
+  const hasContent = Boolean(
+    activeSubDiscipline?.available && activeSubDiscipline.chapters.length > 0,
+  );
 
   const handleSelectSubDiscipline = (subId: string) => {
     const sub = findSubDiscipline(subId);
@@ -88,7 +88,7 @@ function AppContent() {
 
       </div>
 
-      {hasContent && (
+      {hasContent && activeSubDiscipline && (
         <ContentPanel
           open={panelOpen}
           subDiscipline={activeSubDiscipline}
