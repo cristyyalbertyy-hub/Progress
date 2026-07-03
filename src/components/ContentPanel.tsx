@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import type { SubDiscipline } from '../data/course';
 import type { ProgressLevel } from '../data/course';
+import type { ResourceType } from '../data/packageProgress';
 import { ProgressHeader } from './ProgressHeader';
 import { OnboardingBanner } from './OnboardingBanner';
 import { ResetModal } from './ResetModal';
@@ -11,8 +12,13 @@ interface ContentPanelProps {
   open: boolean;
   subDiscipline: SubDiscipline;
   progress: Record<string, ProgressLevel>;
-  getLevel: (itemId: string) => ProgressLevel;
-  onCycleItem: (itemId: string) => void;
+  synced: boolean;
+  loadingRemote: boolean;
+  canEditRemote: boolean;
+  getLegacyLevel: (itemId: string) => ProgressLevel;
+  getResourceLevel: (itemId: string, resource: ResourceType) => ProgressLevel;
+  onCycleLegacyItem: (itemId: string) => void;
+  onCycleManualResource: (itemId: string, resource: 'I' | 'Q') => void;
   onClose: () => void;
   onReset: () => void;
   resetModalOpen: boolean;
@@ -24,8 +30,13 @@ export function ContentPanel({
   open,
   subDiscipline,
   progress,
-  getLevel,
-  onCycleItem,
+  synced,
+  loadingRemote,
+  canEditRemote,
+  getLegacyLevel,
+  getResourceLevel,
+  onCycleLegacyItem,
+  onCycleManualResource,
   onClose,
   onReset,
   resetModalOpen,
@@ -73,22 +84,33 @@ export function ContentPanel({
               {tr.ui.backToMenu}
             </button>
           </header>
-          <ProgressHeader subDiscipline={subDiscipline} progress={progress} />
-          <OnboardingBanner compact />
+          {synced && loadingRemote && (
+            <p className="sync-status">{tr.ui.loadingProgress}</p>
+          )}
+          {synced && !loadingRemote && !canEditRemote && (
+            <p className="sync-status sync-status--warn">{tr.ui.noEntitlement}</p>
+          )}
+          <ProgressHeader subDiscipline={subDiscipline} progress={progress} synced={synced} />
+          <OnboardingBanner compact subDiscipline={subDiscipline} />
           <SubChapterGrid
             subDiscipline={subDiscipline}
-            getLevel={getLevel}
-            onCycleItem={onCycleItem}
+            synced={synced}
+            getLegacyLevel={getLegacyLevel}
+            getResourceLevel={getResourceLevel}
+            onCycleLegacyItem={onCycleLegacyItem}
+            onCycleManualResource={onCycleManualResource}
           />
-          <footer className="content-panel-footer">
-            <button
-              type="button"
-              className="panel-reset-btn"
-              onClick={onOpenResetModal}
-            >
-              {tr.ui.resetProgressTitle}
-            </button>
-          </footer>
+          {!synced && (
+            <footer className="content-panel-footer">
+              <button
+                type="button"
+                className="panel-reset-btn"
+                onClick={onOpenResetModal}
+              >
+                {tr.ui.resetProgressTitle}
+              </button>
+            </footer>
+          )}
         </div>
       </aside>
       <ResetModal

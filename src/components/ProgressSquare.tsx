@@ -3,12 +3,30 @@ import { PROGRESS_COLORS, type ProgressLevel } from '../data/course';
 
 interface ProgressSquareProps {
   level: ProgressLevel;
-  onClick: () => void;
+  onClick?: () => void;
+  readOnly?: boolean;
+  title?: string;
 }
 
-export function ProgressSquare({ level, onClick }: ProgressSquareProps) {
+export function ProgressSquare({
+  level,
+  onClick,
+  readOnly = false,
+  title,
+}: ProgressSquareProps) {
   const { tr } = useLanguage();
-  const label = tr.progress[level];
+  const label = title ?? tr.progress[level];
+
+  if (readOnly) {
+    return (
+      <span
+        className="progress-square progress-square--readonly"
+        style={{ backgroundColor: PROGRESS_COLORS[level] }}
+        title={label}
+        aria-label={label}
+      />
+    );
+  }
 
   return (
     <button

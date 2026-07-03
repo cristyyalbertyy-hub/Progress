@@ -1,0 +1,189 @@
+import { useCallback, useEffect, useState } from 'react';
+import type { ProgressLevel, SubDiscipline } from '../data/course';
+import {
+  isSyncedPackage,
+  progressCellKey,
+  RESOURCE_TYPES,
+  toFirebaseItemKey,
+  type ResourceType,
+} from '../data/packageProgress';
+import { useAuth } from '../context/AuthContext';
+import { getFirebaseDb } from '../lib/firebase';
+import {
+  firebaseMapToCellLevels,
+  hasEntitlement,
+  loadPackageProgress,
+  recordManualLevel,
+} from '../lib/progress-client';
+
+const STORAGE_KEY = 'medical-science-y1-progress';
+
+function loadLocalProgress(): Record<string, ProgressLevel> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, ProgressLevel>;
+  } catch {
+    return {};
+  }
+}
+
+export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
+  const { user, configured } = useAuth();
+  const [localProgress, setLocalProgress] = useState<Record<string, ProgressLevel>>(
+    loadLocalProgress,
+  );
+  const [firebaseMap, setFirebaseMap] = useState<
+    Record<string, { watch_count?: number; manual_level?: number; status?: string; resource?: string }>
+  >({});
+  const [loadingRemote, setLoadingRemote] = useState(false);
+  const [canEditRemote, setCanEditRemote] = useState(false);
+
+  const packageId = activeSubDiscipline?.packageId;
+  const synced = Boolean(packageId && isSyncedPackage(packageId));
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(localProgress));
+  }, [localProgress]);
+
+  const reloadRemote = useCallback(async () => {
+    if (!synced || !configured || !user || !packageId) {
+      setFirebaseMap({});
+      setCanEditRemote(false);
+      return;
+    }
+
+    setLoadingRemote(true);
+    try {
+      const entitled = await hasEntitlement(getFirebaseDb(), user.uid, packageId);
+      setCanEditRemote(entitled);
+      if (!entitled) {
+        setFirebaseMap({});
+        return;
+      }
+      const map = await loadPackageProgress(getFirebaseDb(), user.uid, packageId);
+      setFirebaseMap(map);
+    } catch (err) {
+      console.warn('Could not load remote progress:', err);
+      setFirebaseMap({});
+      setCanEditRemote(false);
+    } finally {
+      setLoadingRemote(false);
+    }
+  }, [synced, configured, user, packageId]);
+
+  useEffect(() => {
+    void reloadRemote();
+  }, [reloadRemote]);
+
+  const getLegacyLevel = useCallback(
+    (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,
+    [localProgress],
+  );
+
+  const getResourceLevel = useCallback(
+    (itemId: string, resource: ResourceType): ProgressLevel => {
+      if (!synced || !packageId) return getLegacyLevel(itemId);
+      const firebaseItemKey = toFirebaseItemKey(packageId, itemId);
+      const levels = firebaseMapToCellLevels(firebaseMap, firebaseItemKey);
+      return levels[resource];
+    },
+    [synced, packageId, firebaseMap, getLegacyLevel],
+  );
+
+  const cycleLegacyItem = useCallback((itemId: string) => {
+    setLocalProgress((prev) => {
+      const current = prev[itemId] ?? 0;
+      const next = ((current + 1) % 4) as ProgressLevel;
+      return { ...prev, [itemId]: next };
+    });
+  }, []);
+
+  const cycleManualResource = useCallback(
+    async (itemId: string, resource: 'I' | 'Q') => {
+      if (!synced || !packageId || !user || !canEditRemote) return;
+
+      const firebaseItemKey = toFirebaseItemKey(packageId, itemId);
+      const current = getResourceLevel(itemId, resource);
+      const next = ((current + 1) % 4) as ProgressLevel;
+
+      setFirebaseMap((prev) => ({
+        ...prev,
+        [`${firebaseItemKey}/${resource}`]: {
+          ...(prev[`${firebaseItemKey}/${resource}`] ?? {}),
+          manual_level: next,
+          resource,
+        },
+      }));
+
+      try {
+        await recordManualLevel(
+          getFirebaseDb(),
+          user.uid,
+          packageId,
+          firebaseItemKey,
+          resource,
+          next,
+        );
+      } catch (err) {
+        console.warn('Could not save manual progress:', err);
+        void reloadRemote();
+      }
+    },
+    [synced, packageId, user, canEditRemote, getResourceLevel, reloadRemote],
+  );
+
+  const resetLocalAll = useCallback(() => {
+    setLocalProgress({});
+  }, []);
+
+  const progressSummary = useCallback(
+    (sub: SubDiscipline) => {
+      const itemIds = sub.chapters.flatMap((c) => c.items.map((i) => i.id));
+      if (sub.packageId && isSyncedPackage(sub.packageId)) {
+        let consolidated = 0;
+        let cells = 0;
+        for (const itemId of itemIds) {
+          for (const resource of RESOURCE_TYPES) {
+            cells += 1;
+            if (getResourceLevel(itemId, resource) === 3) consolidated += 1;
+          }
+        }
+        return { consolidated, itemCount: cells, itemTopics: itemIds.length };
+      }
+
+      const consolidated = itemIds.filter((id) => getLegacyLevel(id) === 3).length;
+      return { consolidated, itemCount: itemIds.length, itemTopics: itemIds.length };
+    },
+    [getLegacyLevel, getResourceLevel],
+  );
+
+  const flatProgressForHeader = useCallback((): Record<string, ProgressLevel> => {
+    if (!activeSubDiscipline?.packageId || !isSyncedPackage(activeSubDiscipline.packageId)) {
+      return localProgress;
+    }
+    const out: Record<string, ProgressLevel> = {};
+    for (const chapter of activeSubDiscipline.chapters) {
+      for (const item of chapter.items) {
+        for (const resource of RESOURCE_TYPES) {
+          out[progressCellKey(item.id, resource)] = getResourceLevel(item.id, resource);
+        }
+      }
+    }
+    return out;
+  }, [activeSubDiscipline, localProgress, getResourceLevel]);
+
+  return {
+    synced,
+    loadingRemote,
+    canEditRemote,
+    getLegacyLevel,
+    getResourceLevel,
+    cycleLegacyItem,
+    cycleManualResource,
+    resetLocalAll,
+    progressSummary,
+    flatProgressForHeader,
+    reloadRemote,
+  };
+}

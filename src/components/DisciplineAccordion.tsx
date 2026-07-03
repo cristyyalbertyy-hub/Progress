@@ -6,12 +6,16 @@ import {
   type SubDiscipline,
 } from '../data/course';
 import type { ProgressLevel } from '../data/course';
+import { isSyncedPackage } from '../data/packageProgress';
 
 interface DisciplineAccordionProps {
   groups: DisciplineGroup[];
   activeSubDisciplineId: string | null;
   expandedGroupIds: Set<string>;
-  progress: Record<string, ProgressLevel>;
+  localProgress: Record<string, ProgressLevel>;
+  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  entitledPackageIds: string[];
+  signedIn: boolean;
   panelOpen: boolean;
   hasContent: boolean;
   onToggleGroup: (groupId: string) => void;
@@ -23,14 +27,17 @@ export function DisciplineAccordion({
   groups,
   activeSubDisciplineId,
   expandedGroupIds,
-  progress,
+  localProgress,
+  summaryForSub,
+  entitledPackageIds,
+  signedIn,
   panelOpen,
   hasContent,
   onToggleGroup,
   onSelectSubDiscipline,
   onTogglePanel,
 }: DisciplineAccordionProps) {
-  const { tGroup, tr } = useLanguage();
+  const { tr } = useLanguage();
 
   const panelButtonLabel = panelOpen ? tr.ui.closePanel : tr.ui.viewProgress;
 
@@ -40,6 +47,17 @@ export function DisciplineAccordion({
       : tr.ui.placeholder
     : null;
 
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      subDisciplines: group.subDisciplines.filter((sub) => {
+        if (!sub.packageId || !isSyncedPackage(sub.packageId)) return true;
+        if (!signedIn) return true;
+        return entitledPackageIds.includes(sub.packageId);
+      }),
+    }))
+    .filter((group) => group.subDisciplines.length > 0);
+
   return (
     <aside className="discipline-accordion">
       <header className="accordion-header">
@@ -47,14 +65,15 @@ export function DisciplineAccordion({
       </header>
 
       <nav className="accordion-nav">
-        {groups.map((group) => (
+        {visibleGroups.map((group) => (
           <AccordionGroup
             key={group.id}
             group={group}
-            groupTitle={tGroup(group.id)}
             isExpanded={expandedGroupIds.has(group.id)}
             activeSubDisciplineId={activeSubDisciplineId}
-            progress={progress}
+            localProgress={localProgress}
+            summaryForSub={summaryForSub}
+            entitledPackageIds={entitledPackageIds}
             onToggle={() => onToggleGroup(group.id)}
             onSelectSubDiscipline={onSelectSubDiscipline}
           />
@@ -79,21 +98,25 @@ export function DisciplineAccordion({
 
 function AccordionGroup({
   group,
-  groupTitle,
   isExpanded,
   activeSubDisciplineId,
-  progress,
+  localProgress,
+  summaryForSub,
+  entitledPackageIds,
   onToggle,
   onSelectSubDiscipline,
 }: {
   group: DisciplineGroup;
-  groupTitle: string;
   isExpanded: boolean;
   activeSubDisciplineId: string | null;
-  progress: Record<string, ProgressLevel>;
+  localProgress: Record<string, ProgressLevel>;
+  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  entitledPackageIds: string[];
   onToggle: () => void;
   onSelectSubDiscipline: (id: string) => void;
 }) {
+  const { tGroup } = useLanguage();
+
   return (
     <div className={`accordion-group ${isExpanded ? 'expanded' : ''}`}>
       <button
@@ -103,7 +126,7 @@ function AccordionGroup({
         aria-expanded={isExpanded}
       >
         <span className="accordion-chevron">{isExpanded ? '▾' : '▸'}</span>
-        <span className="accordion-group-title">{groupTitle}</span>
+        <span className="accordion-group-title">{tGroup(group.id)}</span>
       </button>
 
       {isExpanded && (
@@ -113,7 +136,9 @@ function AccordionGroup({
               key={sub.id}
               sub={sub}
               isActive={sub.id === activeSubDisciplineId}
-              progress={progress}
+              localProgress={localProgress}
+              summaryForSub={summaryForSub}
+              entitledPackageIds={entitledPackageIds}
               onSelect={() => onSelectSubDiscipline(sub.id)}
             />
           ))}
@@ -126,17 +151,33 @@ function AccordionGroup({
 function SubDisciplineBtn({
   sub,
   isActive,
-  progress,
+  localProgress,
+  summaryForSub,
+  entitledPackageIds,
   onSelect,
 }: {
   sub: SubDiscipline;
   isActive: boolean;
-  progress: Record<string, ProgressLevel>;
+  localProgress: Record<string, ProgressLevel>;
+  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  entitledPackageIds: string[];
   onSelect: () => void;
 }) {
   const { tSubject, tr } = useLanguage();
   const itemIds = getAllItemIds(sub);
-  const { consolidated, itemCount } = calcProgress(itemIds, progress);
+  const synced = Boolean(sub.packageId && isSyncedPackage(sub.packageId));
+  const entitled = synced && sub.packageId ? entitledPackageIds.includes(sub.packageId) : false;
+
+  let consolidated = 0;
+  let itemCount = itemIds.length;
+
+  if (synced && entitled) {
+    const remote = summaryForSub(sub);
+    consolidated = remote.consolidated;
+    itemCount = remote.itemCount;
+  } else if (!synced) {
+    ({ consolidated } = calcProgress(itemIds, localProgress));
+  }
 
   return (
     <button
@@ -147,7 +188,7 @@ function SubDisciplineBtn({
       <span className="subdiscipline-label">{tSubject(sub.id)}</span>
       {sub.available ? (
         <span className="subdiscipline-progress">
-          {consolidated}/{itemCount}
+          {synced && !entitled ? '—' : `${consolidated}/${itemCount}`}
         </span>
       ) : (
         <span className="coming-soon">{tr.ui.comingSoon}</span>

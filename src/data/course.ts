@@ -14,6 +14,8 @@ export interface SubDiscipline {
   number: number;
   available: boolean;
   packageUrl?: string;
+  /** Firebase package id when progress syncs from package apps */
+  packageId?: string;
   chapters: Chapter[];
 }
 
@@ -234,6 +236,7 @@ export const disciplineGroups: DisciplineGroup[] = [
         number: 2,
         available: true,
         packageUrl: 'https://biology-genetics.vercel.app/#/app',
+        packageId: 'medical-biology',
         chapters: medicalBiologyChapters,
       },
       {
@@ -241,6 +244,7 @@ export const disciplineGroups: DisciplineGroup[] = [
         number: 3,
         available: true,
         packageUrl: 'https://medica-genetics.vercel.app/',
+        packageId: 'genetics',
         chapters: geneticsChapters,
       },
     ],

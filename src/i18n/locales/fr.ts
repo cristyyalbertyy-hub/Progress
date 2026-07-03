@@ -20,6 +20,20 @@ export const fr: Translations = {
     onboardingTitle: 'Comment fonctionne la progression',
     onboardingText:
       'Suivez votre progression dans chaque sous-chapitre des packages interactifs. Cliquez sur le carré pour avancer dans les phases d\'apprentissage.',
+    onboardingSyncedIntro:
+      'Pour les packages achetés, la progression fonctionne de deux façons — automatique là où l\'app voit votre travail, manuelle là où seul vous savez si vous êtes prêt.',
+    onboardingAutoRule:
+      'Les carrés vidéo et podcast se mettent à jour quand vous terminez de regarder ou écouter dans l\'app du package (jusqu\'à 3 fois : jaune → orange → vert).',
+    onboardingManualRule:
+      'Les carrés infographie et questionnaire sont à votre charge : cliquez pour indiquer votre niveau. C\'est votre responsabilité.',
+    manualResponsibilityNote:
+      'À partir des colonnes infographie et questionnaire, la progression reflète votre auto-évaluation honnête — l\'app ne peut pas savoir quand vous avez vraiment compris.',
+    signInPrompt:
+      'Connectez-vous avec le même e-mail que pour l\'achat pour voir la progression synchronisée des vidéos et podcasts.',
+    signInCta: 'Se connecter sur Studio9 →',
+    loadingProgress: 'Chargement de votre progression…',
+    noEntitlement:
+      'Ce package n\'est pas actif sur votre compte. Progression en lecture seule jusqu\'à l\'achat.',
     placeholder:
       'Sélectionnez une discipline avec du contenu disponible ou attendez l\'ajout des sous-chapitres.',
     chapters: 'chapitres',
@@ -28,6 +42,12 @@ export const fr: Translations = {
     subchapter: 'sous-chapitre',
     progressClick: 'cliquer pour avancer',
     language: 'Langue',
+  },
+  resources: {
+    V: 'Vidéo',
+    P: 'Podcast',
+    I: 'Infographie',
+    Q: 'Questionnaire',
   },
   progress: {
     0: 'Non commencé',

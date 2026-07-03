@@ -26,6 +26,20 @@ export const en: Translations = {
     onboardingTitle: 'How progress works',
     onboardingText:
       'Track your progress in each subchapter of the interactive packages. Click the square to advance through the learning stages.',
+    onboardingSyncedIntro:
+      'For purchased packages, progress works in two ways — automatic where the app can see your study, manual where only you can judge readiness.',
+    onboardingAutoRule:
+      'Video and podcast squares update on their own when you finish watching or listening in the package app (up to 3 times: yellow → orange → green).',
+    onboardingManualRule:
+      'Infographic and questionnaire squares are yours to update: click to mark how well you know the topic. That is your responsibility.',
+    manualResponsibilityNote:
+      'From the infographic and questionnaire columns onward, progress reflects your honest self-assessment — the app cannot know when you have truly understood.',
+    signInPrompt:
+      'Sign in with the same email you used to buy a package to see synced progress for videos and podcasts.',
+    signInCta: 'Sign in on Studio9 →',
+    loadingProgress: 'Loading your progress…',
+    noEntitlement:
+      'This package is not active on your account. Progress is read-only until you purchase access.',
     placeholder:
       'Select a discipline with available content or wait for subchapters to be added.',
     chapters: 'chapters',
@@ -34,6 +48,12 @@ export const en: Translations = {
     subchapter: 'subchapter',
     progressClick: 'click to advance',
     language: 'Language',
+  },
+  resources: {
+    V: 'Video',
+    P: 'Podcast',
+    I: 'Infographic',
+    Q: 'Questions',
   },
   progress: {
     0: 'Not started',

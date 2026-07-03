@@ -1,16 +1,22 @@
 import { useLanguage } from '../context/LanguageContext';
-import { calcProgress, getAllItemIds, type SubDiscipline } from '../data/course';
+import {
+  calcProgress,
+  getAllItemIds,
+  type SubDiscipline,
+} from '../data/course';
 import type { ProgressLevel } from '../data/course';
 
 interface ProgressHeaderProps {
   subDiscipline: SubDiscipline;
   progress: Record<string, ProgressLevel>;
+  synced?: boolean;
 }
 
-export function ProgressHeader({ subDiscipline, progress }: ProgressHeaderProps) {
+export function ProgressHeader({ subDiscipline, progress, synced = false }: ProgressHeaderProps) {
   const { tSubject, tr } = useLanguage();
   const itemIds = getAllItemIds(subDiscipline);
-  const { percent } = calcProgress(itemIds, progress);
+  const keys = synced ? Object.keys(progress) : itemIds;
+  const { percent } = calcProgress(keys, progress);
 
   return (
     <header className="progress-header">

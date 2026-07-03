@@ -20,6 +20,20 @@ export const it: Translations = {
     onboardingTitle: 'Come funziona il progresso',
     onboardingText:
       'Monitora il progresso in ogni sottocapitolo dei pacchetti interattivi. Clicca sul quadrato per avanzare nelle fasi di apprendimento.',
+    onboardingSyncedIntro:
+      'Nei pacchetti acquistati, il progresso funziona in due modi — automatico dove l\'app vede il tuo studio, manuale dove solo tu sai se sei pronto.',
+    onboardingAutoRule:
+      'I quadrati video e podcast si aggiornano da soli quando finisci di guardare o ascoltare nell\'app del pacchetto (fino a 3 volte: giallo → arancione → verde).',
+    onboardingManualRule:
+      'I quadrati infografica e questionario dipendono da te: clicca per segnare quanto conosci l\'argomento. Quella parte è responsabilità tua.',
+    manualResponsibilityNote:
+      'Dalle colonne infografica e questionario in poi, il progresso riflette la tua autovalutazione onesta — l\'app non può sapere quando hai capito davvero.',
+    signInPrompt:
+      'Accedi con la stessa email dell\'acquisto per vedere il progresso sincronizzato di video e podcast.',
+    signInCta: 'Accedi su Studio9 →',
+    loadingProgress: 'Caricamento del progresso…',
+    noEntitlement:
+      'Questo pacchetto non è attivo sul tuo account. Progresso in sola lettura fino all\'acquisto.',
     placeholder:
       'Seleziona una disciplina con contenuti disponibili o attendi l\'aggiunta dei sottocapitoli.',
     chapters: 'capitoli',
@@ -28,6 +42,12 @@ export const it: Translations = {
     subchapter: 'sottocapitolo',
     progressClick: 'clicca per avanzare',
     language: 'Lingua',
+  },
+  resources: {
+    V: 'Video',
+    P: 'Podcast',
+    I: 'Infografica',
+    Q: 'Questionario',
   },
   progress: {
     0: 'Non iniziato',

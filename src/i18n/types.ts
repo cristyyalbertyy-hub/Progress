@@ -17,6 +17,14 @@ export interface Translations {
     completedIn: string;
     onboardingTitle: string;
     onboardingText: string;
+    onboardingSyncedIntro: string;
+    onboardingAutoRule: string;
+    onboardingManualRule: string;
+    manualResponsibilityNote: string;
+    signInPrompt: string;
+    signInCta: string;
+    loadingProgress: string;
+    noEntitlement: string;
     placeholder: string;
     chapters: string;
     chapter: string;
@@ -24,6 +32,12 @@ export interface Translations {
     subchapter: string;
     progressClick: string;
     language: string;
+  };
+  resources: {
+    V: string;
+    P: string;
+    I: string;
+    Q: string;
   };
   progress: {
     0: string;

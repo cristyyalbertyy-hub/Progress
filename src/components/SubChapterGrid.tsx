@@ -4,18 +4,29 @@ import {
   type SubDiscipline,
 } from '../data/course';
 import type { ProgressLevel } from '../data/course';
+import {
+  AUTO_RESOURCES,
+  RESOURCE_TYPES,
+  type ResourceType,
+} from '../data/packageProgress';
 import { ProgressSquare } from './ProgressSquare';
 
 interface SubChapterGridProps {
   subDiscipline: SubDiscipline;
-  getLevel: (itemId: string) => ProgressLevel;
-  onCycleItem: (itemId: string) => void;
+  synced: boolean;
+  getLegacyLevel: (itemId: string) => ProgressLevel;
+  getResourceLevel: (itemId: string, resource: ResourceType) => ProgressLevel;
+  onCycleLegacyItem: (itemId: string) => void;
+  onCycleManualResource: (itemId: string, resource: 'I' | 'Q') => void;
 }
 
 export function SubChapterGrid({
   subDiscipline,
-  getLevel,
-  onCycleItem,
+  synced,
+  getLegacyLevel,
+  getResourceLevel,
+  onCycleLegacyItem,
+  onCycleManualResource,
 }: SubChapterGridProps) {
   const { tChapter, tSubchapter, tSubject, tr } = useLanguage();
   const subChapterCount = countSubDisciplineItems(subDiscipline);
@@ -45,6 +56,16 @@ export function SubChapterGrid({
         </p>
       </header>
 
+      {synced && (
+        <div className="resource-legend-row" aria-hidden="true">
+          {RESOURCE_TYPES.map((resource) => (
+            <span key={resource} className="resource-legend-label">
+              {tr.resources[resource]}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="subchapter-table">
         {subDiscipline.chapters.map((ch) => (
           <section key={ch.id} className="subchapter-row">
@@ -57,16 +78,46 @@ export function SubChapterGrid({
                   <span className="subchapter-tile-label">
                     {tSubchapter(item.id)}
                   </span>
-                  <ProgressSquare
-                    level={getLevel(item.id)}
-                    onClick={() => onCycleItem(item.id)}
-                  />
+                  {synced ? (
+                    <div className="resource-progress-row">
+                      {RESOURCE_TYPES.map((resource) => {
+                        const level = getResourceLevel(item.id, resource);
+                        const auto = AUTO_RESOURCES.includes(resource);
+                        return (
+                          <ProgressSquare
+                            key={resource}
+                            level={level}
+                            readOnly={auto}
+                            title={`${tr.resources[resource]}: ${tr.progress[level]}`}
+                            onClick={
+                              auto
+                                ? undefined
+                                : () =>
+                                    onCycleManualResource(
+                                      item.id,
+                                      resource as 'I' | 'Q',
+                                    )
+                            }
+                          />
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <ProgressSquare
+                      level={getLegacyLevel(item.id)}
+                      onClick={() => onCycleLegacyItem(item.id)}
+                    />
+                  )}
                 </div>
               ))}
             </div>
           </section>
         ))}
       </div>
+
+      {synced && (
+        <p className="manual-responsibility-note">{tr.ui.manualResponsibilityNote}</p>
+      )}
     </div>
   );
 }

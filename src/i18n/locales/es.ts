@@ -20,6 +20,20 @@ export const es: Translations = {
     onboardingTitle: 'Cómo funciona el progreso',
     onboardingText:
       'Sigue tu progreso en cada subcapítulo de los paquetes interactivos. Haz clic en el cuadrado para avanzar entre las fases de aprendizaje.',
+    onboardingSyncedIntro:
+      'En los paquetes comprados, el progreso funciona de dos maneras: automático donde la app ve tu estudio, manual donde solo tú sabes si estás preparado.',
+    onboardingAutoRule:
+      'Los cuadrados de vídeo y podcast se actualizan solos al terminar de ver u oír en la app del paquete (hasta 3 veces: amarillo → naranja → verde).',
+    onboardingManualRule:
+      'Los cuadrados de infografía y cuestionario dependen de ti: haz clic para marcar cuánto dominas el tema. Esa parte es tu responsabilidad.',
+    manualResponsibilityNote:
+      'Desde las columnas de infografía y cuestionario, el progreso refleja tu autoevaluación honesta — la app no puede saber cuándo has comprendido de verdad.',
+    signInPrompt:
+      'Inicia sesión con el mismo email de la compra para ver el progreso sincronizado de vídeos y podcasts.',
+    signInCta: 'Iniciar sesión en Studio9 →',
+    loadingProgress: 'Cargando tu progreso…',
+    noEntitlement:
+      'Este paquete no está activo en tu cuenta. El progreso es de solo lectura hasta que compres acceso.',
     placeholder:
       'Selecciona una disciplina con contenido disponible o espera a que se añadan los subcapítulos.',
     chapters: 'capítulos',
@@ -28,6 +42,12 @@ export const es: Translations = {
     subchapter: 'subcapítulo',
     progressClick: 'clic para avanzar',
     language: 'Idioma',
+  },
+  resources: {
+    V: 'Vídeo',
+    P: 'Podcast',
+    I: 'Infografía',
+    Q: 'Cuestionario',
   },
   progress: {
     0: 'Sin empezar',
