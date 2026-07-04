@@ -201,123 +201,108 @@ const italianHealthSystemChapters: Chapter[] = [
   chapter('budgeting-costs', ['ihs-bc']),
 ];
 
+/** One purchasable package = one sidebar row (no curriculum umbrella titles). */
+function packageGroup(sub: SubDiscipline): DisciplineGroup {
+  return { id: sub.id, subDisciplines: [sub] };
+}
+
 export const disciplineGroups: DisciplineGroup[] = [
-  {
-    id: 'physics-stats-info',
-    subDisciplines: [
-      {
-        id: 'physics',
-        number: 4,
-        available: true,
-        packageUrl: 'https://physics-tau-five.vercel.app/',
-        chapters: physicsChapters,
-      },
-      {
-        id: 'statistics',
-        number: 6,
-        available: true,
-        packageUrl: 'https://statistics-nu-eight.vercel.app/',
-        chapters: statisticsChapters,
-      },
-      {
-        id: 'information-processing',
-        number: 5,
-        available: true,
-        packageUrl: 'https://informatics-theta.vercel.app/',
-        chapters: informationProcessingChapters,
-      },
-    ],
-  },
-  {
-    id: 'biology-genetics',
-    subDisciplines: [
-      {
-        id: 'medical-biology',
-        number: 2,
-        available: true,
-        packageUrl: 'https://biology-genetics.vercel.app/#/app',
-        packageId: 'medical-biology',
-        chapters: medicalBiologyChapters,
-      },
-      {
-        id: 'genetics',
-        number: 3,
-        available: true,
-        packageUrl: 'https://medica-genetics.vercel.app/',
-        packageId: 'genetics',
-        chapters: geneticsChapters,
-      },
-    ],
-  },
-  {
+  packageGroup({
     id: 'human-anatomy',
-    subDisciplines: [
-      {
-        id: 'human-anatomy',
-        number: 1,
-        available: true,
-        packageUrl: 'https://human-anatomy1.vercel.app/',
-        chapters: humanAnatomyChapters,
-      },
-    ],
-  },
-  {
-    id: 'chemistry-biochemistry',
-    subDisciplines: [
-      {
-        id: 'chemistry-biochemistry',
-        number: 8,
-        available: true,
-        packageUrl: 'https://chemistry-roan.vercel.app/',
-        chapters: chemistryBiochemistryChapters,
-      },
-    ],
-  },
-  {
-    id: 'economics-social-politics',
-    subDisciplines: [
-      {
-        id: 'history-of-medicine',
-        number: 9,
-        available: true,
-        packageUrl: 'https://history-medicine.vercel.app/',
-        chapters: historyOfMedicineChapters,
-      },
-      {
-        id: 'moral-philosophy',
-        number: 10,
-        available: true,
-        packageUrl: 'https://moral-philosophy.vercel.app/',
-        chapters: moralPhilosophyChapters,
-      },
-      {
-        id: 'health-technology-assessments',
-        number: 11,
-        available: true,
-        packageUrl: 'https://health-technology-assessments.vercel.app/',
-        chapters: healthTechnologyAssessmentChapters,
-      },
-      {
-        id: 'italian-health-system',
-        number: 12,
-        available: true,
-        packageUrl: 'https://italian-health-system.vercel.app/',
-        chapters: italianHealthSystemChapters,
-      },
-    ],
-  },
-  {
+    number: 1,
+    available: true,
+    packageId: 'human-anatomy-1',
+    packageUrl: 'https://human-anatomy1.vercel.app/',
+    chapters: humanAnatomyChapters,
+  }),
+  packageGroup({
+    id: 'medical-biology',
+    number: 2,
+    available: true,
+    packageUrl: 'https://biology-genetics.vercel.app/#/app',
+    packageId: 'medical-biology',
+    chapters: medicalBiologyChapters,
+  }),
+  packageGroup({
+    id: 'genetics',
+    number: 3,
+    available: true,
+    packageUrl: 'https://medica-genetics.vercel.app/',
+    packageId: 'genetics',
+    chapters: geneticsChapters,
+  }),
+  packageGroup({
+    id: 'physics',
+    number: 4,
+    available: true,
+    packageId: 'physics',
+    packageUrl: 'https://physics-tau-five.vercel.app/',
+    chapters: physicsChapters,
+  }),
+  packageGroup({
+    id: 'information-processing',
+    number: 5,
+    available: true,
+    packageId: 'information-processing',
+    packageUrl: 'https://informatics-theta.vercel.app/',
+    chapters: informationProcessingChapters,
+  }),
+  packageGroup({
+    id: 'statistics',
+    number: 6,
+    available: true,
+    packageId: 'statistics',
+    packageUrl: 'https://statistics-nu-eight.vercel.app/',
+    chapters: statisticsChapters,
+  }),
+  packageGroup({
     id: 'histology-embryology',
-    subDisciplines: [
-      {
-        id: 'histology-embryology',
-        number: 7,
-        available: true,
-        packageUrl: 'https://histology-embryology.vercel.app/',
-        chapters: histologyEmbryologyChapters,
-      },
-    ],
-  },
+    number: 7,
+    available: true,
+    packageId: 'histology-embryology',
+    packageUrl: 'https://histology-embryology.vercel.app/',
+    chapters: histologyEmbryologyChapters,
+  }),
+  packageGroup({
+    id: 'chemistry-biochemistry',
+    number: 8,
+    available: true,
+    packageId: 'chemistry-introductory-biochemistry',
+    packageUrl: 'https://chemistry-roan.vercel.app/',
+    chapters: chemistryBiochemistryChapters,
+  }),
+  packageGroup({
+    id: 'history-of-medicine',
+    number: 9,
+    available: true,
+    packageId: 'history-of-medicine',
+    packageUrl: 'https://history-medicine.vercel.app/',
+    chapters: historyOfMedicineChapters,
+  }),
+  packageGroup({
+    id: 'moral-philosophy',
+    number: 10,
+    available: true,
+    packageId: 'moral-philosophy',
+    packageUrl: 'https://moral-philosophy.vercel.app/',
+    chapters: moralPhilosophyChapters,
+  }),
+  packageGroup({
+    id: 'health-technology-assessments',
+    number: 11,
+    available: true,
+    packageId: 'health-technology-assessments',
+    packageUrl: 'https://health-technology-assessments.vercel.app/',
+    chapters: healthTechnologyAssessmentChapters,
+  }),
+  packageGroup({
+    id: 'italian-health-system',
+    number: 12,
+    available: true,
+    packageId: 'italian-health-system',
+    packageUrl: 'https://italian-health-system.vercel.app/',
+    chapters: italianHealthSystemChapters,
+  }),
 ];
 
 export function getAllSubDisciplines(): SubDiscipline[] {

@@ -6,7 +6,11 @@ import {
   type SubDiscipline,
 } from '../data/course';
 import type { ProgressLevel } from '../data/course';
-import { isSyncedPackage } from '../data/packageProgress';
+import {
+  isSubVisibleToStudent,
+  isSyncedPackage,
+  packageIdForSub,
+} from '../data/packageProgress';
 
 interface DisciplineAccordionProps {
   groups: DisciplineGroup[];
@@ -50,11 +54,9 @@ export function DisciplineAccordion({
   const visibleGroups = groups
     .map((group) => ({
       ...group,
-      subDisciplines: group.subDisciplines.filter((sub) => {
-        if (!sub.packageId || !isSyncedPackage(sub.packageId)) return true;
-        if (!signedIn) return true;
-        return entitledPackageIds.includes(sub.packageId);
-      }),
+      subDisciplines: group.subDisciplines.filter((sub) =>
+        isSubVisibleToStudent(sub, signedIn, entitledPackageIds),
+      ),
     }))
     .filter((group) => group.subDisciplines.length > 0);
 
@@ -65,6 +67,11 @@ export function DisciplineAccordion({
       </header>
 
       <nav className="accordion-nav">
+        {visibleGroups.length === 0 ? (
+          <p className="sidebar-hint">
+            {signedIn ? tr.ui.noEntitledPackages : tr.ui.signInPrompt}
+          </p>
+        ) : null}
         {visibleGroups.map((group) => (
           <AccordionGroup
             key={group.id}
@@ -115,6 +122,21 @@ function AccordionGroup({
   onToggle: () => void;
   onSelectSubDiscipline: (id: string) => void;
 }) {
+  if (group.subDisciplines.length === 1) {
+    const sub = group.subDisciplines[0];
+    return (
+      <SubDisciplineBtn
+        sub={sub}
+        isActive={sub.id === activeSubDisciplineId}
+        localProgress={localProgress}
+        summaryForSub={summaryForSub}
+        entitledPackageIds={entitledPackageIds}
+        onSelect={() => onSelectSubDiscipline(sub.id)}
+        className="subdiscipline-btn--package"
+      />
+    );
+  }
+
   const { tGroup } = useLanguage();
 
   return (
@@ -155,6 +177,7 @@ function SubDisciplineBtn({
   summaryForSub,
   entitledPackageIds,
   onSelect,
+  className = '',
 }: {
   sub: SubDiscipline;
   isActive: boolean;
@@ -162,11 +185,13 @@ function SubDisciplineBtn({
   summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
   entitledPackageIds: string[];
   onSelect: () => void;
+  className?: string;
 }) {
   const { tSubject, tr } = useLanguage();
   const itemIds = getAllItemIds(sub);
-  const synced = Boolean(sub.packageId && isSyncedPackage(sub.packageId));
-  const entitled = synced && sub.packageId ? entitledPackageIds.includes(sub.packageId) : false;
+  const pkgId = packageIdForSub(sub);
+  const synced = isSyncedPackage(pkgId);
+  const entitled = synced ? entitledPackageIds.includes(pkgId) : true;
 
   let consolidated = 0;
   let itemCount = itemIds.length;
@@ -182,7 +207,7 @@ function SubDisciplineBtn({
   return (
     <button
       type="button"
-      className={`subdiscipline-btn ${isActive ? 'active' : ''} ${!sub.available ? 'unavailable' : ''}`}
+      className={`subdiscipline-btn ${className} ${isActive ? 'active' : ''} ${!sub.available ? 'unavailable' : ''}`}
       onClick={onSelect}
     >
       <span className="subdiscipline-label">{tSubject(sub.id)}</span>

@@ -34,6 +34,8 @@ export const it: Translations = {
     loadingProgress: 'Caricamento del progresso…',
     noEntitlement:
       'Questo pacchetto non è attivo sul tuo account. Progresso in sola lettura fino all\'acquisto.',
+    noEntitledPackages:
+      'Nessun pacchetto attivo sul tuo account. Accedi con l\'email dell\'acquisto o apri Il mio account su Studio9.',
     placeholder:
       'Seleziona una disciplina con contenuti disponibili o attendi l\'aggiunta dei sottocapitoli.',
     chapters: 'capitoli',

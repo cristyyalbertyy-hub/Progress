@@ -9,7 +9,7 @@ import {
   findGroupForSubDiscipline,
   findSubDiscipline,
 } from './data/course';
-import { isSyncedPackage } from './data/packageProgress';
+import { isSyncedPackage, packageIdForSub } from './data/packageProgress';
 import { useHybridProgress } from './hooks/useHybridProgress';
 import { useRemoteProgressCache } from './hooks/useRemoteProgressCache';
 import { useProgress } from './hooks/useProgress';
@@ -58,7 +58,7 @@ function AppContent() {
     if (!pkg) return;
     const sub = disciplineGroups
       .flatMap((g) => g.subDisciplines)
-      .find((s) => s.packageId === pkg || s.id === pkg);
+      .find((s) => packageIdForSub(s) === pkg || s.id === pkg);
     if (sub?.available) {
       const group = findGroupForSubDiscipline(sub.id);
       if (group) setExpandedGroupIds((prev) => new Set(prev).add(group.id));

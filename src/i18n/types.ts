@@ -25,6 +25,7 @@ export interface Translations {
     signInCta: string;
     loadingProgress: string;
     noEntitlement: string;
+    noEntitledPackages: string;
     placeholder: string;
     chapters: string;
     chapter: string;

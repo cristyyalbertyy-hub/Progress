@@ -40,6 +40,8 @@ export const en: Translations = {
     loadingProgress: 'Loading your progress…',
     noEntitlement:
       'This package is not active on your account. Progress is read-only until you purchase access.',
+    noEntitledPackages:
+      'No packages are active on your account. Sign in with the email you used to purchase, or open My account on Studio9.',
     placeholder:
       'Select a discipline with available content or wait for subchapters to be added.',
     chapters: 'chapters',

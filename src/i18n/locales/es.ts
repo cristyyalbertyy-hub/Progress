@@ -34,6 +34,8 @@ export const es: Translations = {
     loadingProgress: 'Cargando tu progreso…',
     noEntitlement:
       'Este paquete no está activo en tu cuenta. El progreso es de solo lectura hasta que compres acceso.',
+    noEntitledPackages:
+      'No hay paquetes activos en tu cuenta. Inicia sesión con el email de la compra o abre Mi cuenta en Studio9.',
     placeholder:
       'Selecciona una disciplina con contenido disponible o espera a que se añadan los subcapítulos.',
     chapters: 'capítulos',

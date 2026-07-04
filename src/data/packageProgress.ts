@@ -33,3 +33,24 @@ export function progressCellKey(itemId: string, resource: ResourceType): string 
 export function isSyncedPackage(packageId?: string): packageId is string {
   return packageId === 'genetics' || packageId === 'medical-biology';
 }
+
+/** Progress sub-discipline id → Firebase / catalog package_id */
+const SUB_ID_TO_PACKAGE_ID: Record<string, string> = {
+  'human-anatomy': 'human-anatomy-1',
+  'chemistry-biochemistry': 'chemistry-introductory-biochemistry',
+};
+
+export function packageIdForSub(sub: { id: string; packageId?: string }): string {
+  if (sub.packageId) return sub.packageId;
+  return SUB_ID_TO_PACKAGE_ID[sub.id] ?? sub.id;
+}
+
+export function isSubVisibleToStudent(
+  sub: { id: string; packageId?: string; available: boolean },
+  signedIn: boolean,
+  entitledPackageIds: string[],
+): boolean {
+  if (!sub.available) return false;
+  if (!signedIn) return false;
+  return entitledPackageIds.includes(packageIdForSub(sub));
+}
