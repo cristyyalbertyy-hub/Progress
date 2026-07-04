@@ -13,6 +13,7 @@ import {
   firebaseMapToCellLevels,
   hasEntitlement,
   loadPackageProgress,
+  subscribePackageProgress,
   recordManualLevel,
 } from '../lib/progress-client';
 
@@ -73,8 +74,65 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   }, [synced, configured, user, packageId]);
 
   useEffect(() => {
-    void reloadRemote();
-  }, [reloadRemote]);
+    if (!synced || !configured || !user || !packageId) {
+      setFirebaseMap({});
+      setCanEditRemote(false);
+      setLoadingRemote(false);
+      return;
+    }
+
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+    setLoadingRemote(true);
+
+    void (async () => {
+      try {
+        const entitled = await hasEntitlement(getFirebaseDb(), user.uid, packageId);
+        if (!active) return;
+        setCanEditRemote(entitled);
+        if (!entitled) {
+          setFirebaseMap({});
+          setLoadingRemote(false);
+          return;
+        }
+
+        unsubscribe = subscribePackageProgress(
+          getFirebaseDb(),
+          user.uid,
+          packageId,
+          (map) => {
+            if (!active) return;
+            setFirebaseMap(map);
+            setLoadingRemote(false);
+          },
+          () => {
+            if (!active) return;
+            setFirebaseMap({});
+            setLoadingRemote(false);
+          },
+        );
+      } catch (err) {
+        console.warn('Could not subscribe to progress:', err);
+        if (!active) return;
+        setCanEditRemote(false);
+        setFirebaseMap({});
+        setLoadingRemote(false);
+      }
+    })();
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void reloadRemote();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [synced, configured, user, packageId, reloadRemote]);
 
   const getLegacyLevel = useCallback(
     (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,

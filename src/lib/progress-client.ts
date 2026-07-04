@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   setDoc,
   where,
@@ -89,6 +90,49 @@ export async function loadPackageProgress(
   });
 
   return map;
+}
+
+export function subscribePackageProgress(
+  db: import('firebase/firestore').Firestore,
+  userId: string,
+  packageId: string,
+  onData: (
+    map: Record<
+      string,
+      { watch_count?: number; manual_level?: number; status?: string; resource?: string }
+    >,
+  ) => void,
+  onError?: (err: unknown) => void,
+): () => void {
+  const q = query(
+    collection(db, 'progress'),
+    where('user_id', '==', userId),
+    where('package_id', '==', packageId),
+  );
+
+  return onSnapshot(
+    q,
+    (snap) => {
+      const map: Record<
+        string,
+        { watch_count?: number; manual_level?: number; status?: string; resource?: string }
+      > = {};
+      snap.forEach((d) => {
+        const data = d.data();
+        map[progressMapKey(data.item_key, data.resource as ResourceType)] = {
+          watch_count: data.watch_count,
+          manual_level: data.manual_level,
+          status: data.status,
+          resource: data.resource,
+        };
+      });
+      onData(map);
+    },
+    (err) => {
+      console.warn('Progress subscription error:', err);
+      onError?.(err);
+    },
+  );
 }
 
 export async function recordManualLevel(
