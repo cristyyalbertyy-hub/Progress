@@ -17,9 +17,28 @@ import './App.css';
 
 function AuthNotice() {
   const { tr } = useLanguage();
-  const { user, ready, configured, accountUrl } = useAuth();
+  const { user, ready, configured, accountUrl, entitledPackageIds, refreshEntitlements } =
+    useAuth();
 
-  if (!configured || !ready || user) return null;
+  if (!configured || !ready) return null;
+
+  if (user && entitledPackageIds.length > 0) return null;
+
+  if (user) {
+    return (
+      <aside className="auth-notice">
+        <p>{tr.ui.noEntitledPackages}</p>
+        <div className="auth-notice-actions">
+          <button type="button" className="auth-notice-link" onClick={() => void refreshEntitlements()}>
+            {tr.ui.refreshEntitlements}
+          </button>
+          <a className="auth-notice-link" href={accountUrl}>
+            {tr.ui.signInCta}
+          </a>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="auth-notice">

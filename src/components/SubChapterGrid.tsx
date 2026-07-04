@@ -14,6 +14,7 @@ import { ProgressSquare } from './ProgressSquare';
 interface SubChapterGridProps {
   subDiscipline: SubDiscipline;
   synced: boolean;
+  canEditManual?: boolean;
   getLegacyLevel: (itemId: string) => ProgressLevel;
   getResourceLevel: (itemId: string, resource: ResourceType) => ProgressLevel;
   onCycleLegacyItem: (itemId: string) => void;
@@ -23,6 +24,7 @@ interface SubChapterGridProps {
 export function SubChapterGrid({
   subDiscipline,
   synced,
+  canEditManual = true,
   getLegacyLevel,
   getResourceLevel,
   onCycleLegacyItem,
@@ -87,10 +89,10 @@ export function SubChapterGrid({
                           <ProgressSquare
                             key={resource}
                             level={level}
-                            readOnly={auto}
+                            readOnly={auto || !canEditManual}
                             title={`${tr.resources[resource]}: ${tr.progress[level]}`}
                             onClick={
-                              auto
+                              auto || !canEditManual
                                 ? undefined
                                 : () =>
                                     onCycleManualResource(

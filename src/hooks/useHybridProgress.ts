@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { getFirebaseDb } from '../lib/firebase';
 import {
   firebaseMapToCellLevels,
-  hasEntitlement,
+  isPackageEntitled,
   loadPackageProgress,
   subscribePackageProgress,
   recordManualLevel,
@@ -30,7 +30,7 @@ function loadLocalProgress(): Record<string, ProgressLevel> {
 }
 
 export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
-  const { user, configured } = useAuth();
+  const { user, configured, entitledPackageIds } = useAuth();
   const [localProgress, setLocalProgress] = useState<Record<string, ProgressLevel>>(
     loadLocalProgress,
   );
@@ -38,10 +38,12 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
     Record<string, { watch_count?: number; manual_level?: number; status?: string; resource?: string }>
   >({});
   const [loadingRemote, setLoadingRemote] = useState(false);
-  const [canEditRemote, setCanEditRemote] = useState(false);
 
   const packageId = activeSubDiscipline?.packageId;
   const synced = Boolean(packageId && isSyncedPackage(packageId));
+  const entitled = Boolean(
+    packageId && isPackageEntitled(entitledPackageIds, packageId),
+  );
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(localProgress));
@@ -50,33 +52,35 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   const reloadRemote = useCallback(async () => {
     if (!synced || !configured || !user || !packageId) {
       setFirebaseMap({});
-      setCanEditRemote(false);
+      return;
+    }
+
+    if (!entitled) {
+      setFirebaseMap({});
       return;
     }
 
     setLoadingRemote(true);
     try {
-      const entitled = await hasEntitlement(getFirebaseDb(), user.uid, packageId);
-      setCanEditRemote(entitled);
-      if (!entitled) {
-        setFirebaseMap({});
-        return;
-      }
       const map = await loadPackageProgress(getFirebaseDb(), user.uid, packageId);
       setFirebaseMap(map);
     } catch (err) {
       console.warn('Could not load remote progress:', err);
       setFirebaseMap({});
-      setCanEditRemote(false);
     } finally {
       setLoadingRemote(false);
     }
-  }, [synced, configured, user, packageId]);
+  }, [synced, configured, user, packageId, entitled]);
 
   useEffect(() => {
     if (!synced || !configured || !user || !packageId) {
       setFirebaseMap({});
-      setCanEditRemote(false);
+      setLoadingRemote(false);
+      return;
+    }
+
+    if (!entitled) {
+      setFirebaseMap({});
       setLoadingRemote(false);
       return;
     }
@@ -87,15 +91,6 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
 
     void (async () => {
       try {
-        const entitled = await hasEntitlement(getFirebaseDb(), user.uid, packageId);
-        if (!active) return;
-        setCanEditRemote(entitled);
-        if (!entitled) {
-          setFirebaseMap({});
-          setLoadingRemote(false);
-          return;
-        }
-
         unsubscribe = subscribePackageProgress(
           getFirebaseDb(),
           user.uid,
@@ -114,7 +109,6 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       } catch (err) {
         console.warn('Could not subscribe to progress:', err);
         if (!active) return;
-        setCanEditRemote(false);
         setFirebaseMap({});
         setLoadingRemote(false);
       }
@@ -132,7 +126,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       unsubscribe?.();
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [synced, configured, user, packageId, reloadRemote]);
+  }, [synced, configured, user, packageId, entitled, reloadRemote]);
 
   const getLegacyLevel = useCallback(
     (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,
@@ -159,7 +153,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
 
   const cycleManualResource = useCallback(
     async (itemId: string, resource: 'I' | 'Q') => {
-      if (!synced || !packageId || !user || !canEditRemote) return;
+      if (!synced || !packageId || !user || !entitled) return;
 
       const firebaseItemKey = toFirebaseItemKey(packageId, itemId);
       const current = getResourceLevel(itemId, resource);
@@ -188,7 +182,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
         void reloadRemote();
       }
     },
-    [synced, packageId, user, canEditRemote, getResourceLevel, reloadRemote],
+    [synced, packageId, user, entitled, getResourceLevel, reloadRemote],
   );
 
   const resetLocalAll = useCallback(() => {
@@ -234,7 +228,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   return {
     synced,
     loadingRemote,
-    canEditRemote,
+    canEditRemote: entitled,
     getLegacyLevel,
     getResourceLevel,
     cycleLegacyItem,

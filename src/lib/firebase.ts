@@ -54,3 +54,9 @@ export function getFirebaseDb(): Firestore {
 
 export const ACCOUNT_URL =
   import.meta.env.VITE_ACCOUNT_URL ?? 'https://medical-science-lilac.vercel.app/conta/';
+
+/** Site Medical origin (for /api/my-entitlements from the Progress app). */
+export const SITE_URL =
+  import.meta.env.VITE_SITE_URL ??
+  (ACCOUNT_URL.replace(/\/conta\/?$/, '').replace(/\/$/, '') ||
+    'https://medical-science-lilac.vercel.app');

@@ -37,6 +37,7 @@ export const en: Translations = {
     signInPrompt:
       'Sign in with the same email you used to buy a package to see synced progress for videos and podcasts.',
     signInCta: 'Sign in on Studio9 →',
+    refreshEntitlements: 'Refresh my packages',
     loadingProgress: 'Loading your progress…',
     noEntitlement:
       'This package is not active on your account. Progress is read-only until you purchase access.',

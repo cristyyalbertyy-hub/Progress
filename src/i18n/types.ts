@@ -23,6 +23,7 @@ export interface Translations {
     manualResponsibilityNote: string;
     signInPrompt: string;
     signInCta: string;
+    refreshEntitlements: string;
     loadingProgress: string;
     noEntitlement: string;
     noEntitledPackages: string;

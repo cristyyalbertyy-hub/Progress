@@ -17,8 +17,12 @@ import {
   getFirebaseAuth,
   getFirebaseDb,
   isFirebaseConfigured,
+  SITE_URL,
 } from '../lib/firebase';
-import { loadActiveEntitlements } from '../lib/progress-client';
+import {
+  fetchEntitlementsViaApi,
+  loadActiveEntitlements,
+} from '../lib/progress-client';
 
 interface AuthContextValue {
   user: User | null;
@@ -52,7 +56,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setEntitledPackageIds([]);
       return;
     }
-    const ids = await loadActiveEntitlements(getFirebaseDb(), user.uid);
+
+    let ids: string[] = [];
+    try {
+      const idToken = await user.getIdToken(true);
+      ids = await fetchEntitlementsViaApi(SITE_URL, idToken);
+    } catch (err) {
+      console.warn('Entitlements API failed, falling back to Firestore:', err);
+      try {
+        ids = await loadActiveEntitlements(getFirebaseDb(), user.uid);
+      } catch (fallbackErr) {
+        console.warn('Firestore entitlements failed:', fallbackErr);
+      }
+    }
     setEntitledPackageIds(ids);
   }, [configured, user]);
 

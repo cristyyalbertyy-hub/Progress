@@ -168,21 +168,69 @@ export async function loadActiveEntitlements(
   db: import('firebase/firestore').Firestore,
   userId: string,
 ): Promise<string[]> {
-  const snap = await getDocs(
-    query(collection(db, 'entitlements'), where('user_id', '==', userId)),
-  );
   const now = Date.now();
-  const ids: string[] = [];
+  const ids = new Set<string>();
 
-  snap.forEach((d) => {
-    const data = d.data();
+  function collect(data: Record<string, unknown>) {
     const expiresAt = new Date(String(data.expires_at)).getTime();
-    if (!Number.isNaN(expiresAt) && expiresAt > now && typeof data.package_id === 'string') {
-      ids.push(data.package_id);
+    if (
+      !Number.isNaN(expiresAt) &&
+      expiresAt > now &&
+      typeof data.package_id === 'string'
+    ) {
+      ids.add(data.package_id);
     }
+  }
+
+  try {
+    const snap = await getDocs(
+      query(collection(db, 'entitlements'), where('user_id', '==', userId)),
+    );
+    snap.forEach((d) => collect(d.data()));
+  } catch (err) {
+    console.warn('Entitlements query failed:', err);
+  }
+
+  for (const packageId of ['medical-biology', 'genetics']) {
+    try {
+      const snap = await getDoc(doc(db, 'entitlements', `${userId}_${packageId}`));
+      if (snap.exists()) collect(snap.data());
+    } catch {
+      /* doc may be unreadable before rules sync */
+    }
+  }
+
+  return [...ids];
+}
+
+export async function fetchEntitlementsViaApi(
+  siteUrl: string,
+  idToken: string,
+): Promise<string[]> {
+  const base = siteUrl.replace(/\/$/, '');
+  const res = await fetch(`${base}/api/my-entitlements`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_token: idToken }),
   });
 
-  return ids;
+  const data = (await res.json().catch(() => ({}))) as {
+    package_ids?: string[];
+    error?: string;
+  };
+
+  if (!res.ok) {
+    throw new Error(data.error ?? `Entitlements API HTTP ${res.status}`);
+  }
+
+  return data.package_ids ?? [];
+}
+
+export function isPackageEntitled(
+  entitledPackageIds: string[],
+  packageId: string,
+): boolean {
+  return entitledPackageIds.includes(packageId);
 }
 
 export async function hasEntitlement(

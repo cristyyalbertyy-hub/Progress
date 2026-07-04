@@ -31,6 +31,7 @@ export const it: Translations = {
     signInPrompt:
       'Accedi con la stessa email dell\'acquisto per vedere il progresso sincronizzato di video e podcast.',
     signInCta: 'Accedi su Studio9 →',
+    refreshEntitlements: 'Aggiorna i miei pacchetti',
     loadingProgress: 'Caricamento del progresso…',
     noEntitlement:
       'Questo pacchetto non è attivo sul tuo account. Progresso in sola lettura fino all\'acquisto.',

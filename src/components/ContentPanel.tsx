@@ -95,6 +95,7 @@ export function ContentPanel({
           <SubChapterGrid
             subDiscipline={subDiscipline}
             synced={synced}
+            canEditManual={canEditRemote}
             getLegacyLevel={getLegacyLevel}
             getResourceLevel={getResourceLevel}
             onCycleLegacyItem={onCycleLegacyItem}
