@@ -17,7 +17,11 @@ interface DisciplineAccordionProps {
   activeSubDisciplineId: string | null;
   expandedGroupIds: Set<string>;
   localProgress: Record<string, ProgressLevel>;
-  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  summaryForSub: (sub: SubDiscipline) => {
+    consolidated: number;
+    itemCount: number;
+    percent: number;
+  };
   entitledPackageIds: string[];
   signedIn: boolean;
   panelOpen: boolean;
@@ -117,7 +121,11 @@ function AccordionGroup({
   isExpanded: boolean;
   activeSubDisciplineId: string | null;
   localProgress: Record<string, ProgressLevel>;
-  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  summaryForSub: (sub: SubDiscipline) => {
+    consolidated: number;
+    itemCount: number;
+    percent: number;
+  };
   entitledPackageIds: string[];
   onToggle: () => void;
   onSelectSubDiscipline: (id: string) => void;
@@ -182,7 +190,11 @@ function SubDisciplineBtn({
   sub: SubDiscipline;
   isActive: boolean;
   localProgress: Record<string, ProgressLevel>;
-  summaryForSub: (sub: SubDiscipline) => { consolidated: number; itemCount: number };
+  summaryForSub: (sub: SubDiscipline) => {
+    consolidated: number;
+    itemCount: number;
+    percent: number;
+  };
   entitledPackageIds: string[];
   onSelect: () => void;
   className?: string;
@@ -193,15 +205,14 @@ function SubDisciplineBtn({
   const synced = isSyncedPackage(pkgId);
   const entitled = synced ? entitledPackageIds.includes(pkgId) : true;
 
-  let consolidated = 0;
-  let itemCount = itemIds.length;
+  let progressLabel: string | null = null;
 
   if (synced && entitled) {
     const remote = summaryForSub(sub);
-    consolidated = remote.consolidated;
-    itemCount = remote.itemCount;
+    progressLabel = `${remote.percent}%`;
   } else if (!synced) {
-    ({ consolidated } = calcProgress(itemIds, localProgress));
+    const { consolidated } = calcProgress(itemIds, localProgress);
+    progressLabel = `${consolidated}/${itemIds.length}`;
   }
 
   return (
@@ -213,7 +224,7 @@ function SubDisciplineBtn({
       <span className="subdiscipline-label">{tSubject(sub.id)}</span>
       {sub.available ? (
         <span className="subdiscipline-progress">
-          {synced && !entitled ? '—' : `${consolidated}/${itemCount}`}
+          {synced && !entitled ? '—' : progressLabel}
         </span>
       ) : (
         <span className="coming-soon">{tr.ui.comingSoon}</span>

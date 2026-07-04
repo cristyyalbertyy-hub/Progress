@@ -146,7 +146,6 @@ function AppContent() {
           <a className="top-bar-back" href={getProgressReturnUrl()}>
             {tr.ui.backToAccount}
           </a>
-          <h1 className="app-title">{tr.ui.appTitle}</h1>
         </div>
         <LanguageSelector />
       </header>
