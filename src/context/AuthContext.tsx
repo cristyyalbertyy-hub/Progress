@@ -23,6 +23,7 @@ import {
   fetchEntitlementsViaApi,
   loadActiveEntitlements,
 } from '../lib/progress-client';
+import { captureReturnUrlFromQuery } from '../lib/returnUrl';
 
 interface AuthContextValue {
   user: User | null;
@@ -79,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     (async () => {
+      captureReturnUrlFromQuery();
       try {
         await trySessionHandoff(auth);
       } catch (err) {

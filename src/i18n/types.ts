@@ -11,6 +11,7 @@ export interface Translations {
     confirmReset: string;
     closePanel: string;
     backToMenu: string;
+    backToAccount: string;
     selectDisciplineHint: string;
     comingSoon: string;
     openPackage: string;

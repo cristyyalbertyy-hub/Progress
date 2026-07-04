@@ -730,6 +730,25 @@ body {
   flex-shrink: 0;
 }
 
+.top-bar-start {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.top-bar-back {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.top-bar-back:hover {
+  text-decoration: underline;
+}
+
 .app-title {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-size: 1.05rem;

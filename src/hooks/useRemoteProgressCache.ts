@@ -12,6 +12,8 @@ import {
   toFirebaseItemKey,
 } from '../data/packageProgress';
 
+const SYNCED_PACKAGE_IDS = ['medical-biology', 'genetics'] as const;
+
 type FirebaseMap = Record<
   string,
   { watch_count?: number; manual_level?: number; status?: string; resource?: string }
@@ -30,7 +32,9 @@ export function useRemoteProgressCache() {
     let cancelled = false;
 
     (async () => {
-      const syncedIds = entitledPackageIds.filter((id) => isSyncedPackage(id));
+      const entitledSynced = entitledPackageIds.filter((id) => isSyncedPackage(id));
+      const syncedIds =
+        entitledSynced.length > 0 ? entitledSynced : [...SYNCED_PACKAGE_IDS];
       const entries = await Promise.all(
         syncedIds.map(async (packageId) => {
           try {

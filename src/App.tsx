@@ -13,6 +13,7 @@ import { isSyncedPackage, packageIdForSub } from './data/packageProgress';
 import { useHybridProgress } from './hooks/useHybridProgress';
 import { useRemoteProgressCache } from './hooks/useRemoteProgressCache';
 import { useProgress } from './hooks/useProgress';
+import { getProgressReturnUrl } from './lib/returnUrl';
 import './App.css';
 
 function AuthNotice() {
@@ -141,7 +142,12 @@ function AppContent() {
   return (
     <div className="app-shell">
       <header className="top-bar">
-        <h1 className="app-title">{tr.ui.appTitle}</h1>
+        <div className="top-bar-start">
+          <a className="top-bar-back" href={getProgressReturnUrl()}>
+            {tr.ui.backToAccount}
+          </a>
+          <h1 className="app-title">{tr.ui.appTitle}</h1>
+        </div>
         <LanguageSelector />
       </header>
 

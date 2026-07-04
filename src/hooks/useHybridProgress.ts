@@ -82,7 +82,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   );
 
   const reloadRemote = useCallback(async () => {
-    if (!synced || !configured || !user || !packageId || !entitled) return;
+    if (!synced || !configured || !user || !packageId) return;
 
     setLoadingRemote(true);
     try {
@@ -95,10 +95,10 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
     } finally {
       setLoadingRemote(false);
     }
-  }, [synced, configured, user, packageId, entitled, syncManualCacheFromMap]);
+  }, [synced, configured, user, packageId, syncManualCacheFromMap]);
 
   useEffect(() => {
-    if (!synced || !configured || !user || !packageId || !entitled) {
+    if (!synced || !configured || !user || !packageId) {
       setFirebaseMap({});
       setLoadingRemote(false);
       return;
@@ -157,7 +157,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       unsubscribe?.();
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [synced, configured, user, packageId, entitled, reloadRemote, syncManualCacheFromMap]);
+  }, [synced, configured, user, packageId, reloadRemote, syncManualCacheFromMap]);
 
   const getLegacyLevel = useCallback(
     (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,

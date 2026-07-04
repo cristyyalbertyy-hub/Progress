@@ -18,6 +18,7 @@ export const en: Translations = {
     confirmReset: 'Reset',
     closePanel: 'Close panel',
     backToMenu: '← Back to menu',
+    backToAccount: '← My account',
     selectDisciplineHint:
       'Select a discipline above, then click «View progress».',
     comingSoon: 'Coming soon',

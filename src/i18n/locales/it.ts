@@ -12,6 +12,7 @@ export const it: Translations = {
     confirmReset: 'Reimposta',
     closePanel: 'Chiudi pannello',
     backToMenu: '← Torna al menu',
+    backToAccount: '← Il mio account',
     selectDisciplineHint:
       'Seleziona una disciplina sopra e clicca «Visualizza progresso».',
     comingSoon: 'In arrivo',
