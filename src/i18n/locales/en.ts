@@ -41,6 +41,8 @@ export const en: Translations = {
     loadingProgress: 'Loading your progress…',
     noEntitlement:
       'This package is not active on your account. Progress is read-only until you purchase access.',
+    saveProgressError:
+      'Could not sync this change to the cloud. Your rating is saved on this device — open My account → My progress to refresh your session.',
     noEntitledPackages:
       'No packages are active on your account. Sign in with the email you used to purchase, or open My account on Studio9.',
     placeholder:

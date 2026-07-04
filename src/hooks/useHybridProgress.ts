@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ProgressLevel, SubDiscipline } from '../data/course';
 import {
   isSyncedPackage,
+  MANUAL_RESOURCES,
   progressCellKey,
   RESOURCE_TYPES,
   toFirebaseItemKey,
@@ -10,9 +11,16 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { getFirebaseDb } from '../lib/firebase';
 import {
-  firebaseMapToCellLevels,
+  getManualCachedLevel,
+  readManualProgressCache,
+  setManualCachedLevel,
+  writeManualProgressCache,
+} from '../lib/manualProgressCache';
+import {
   isPackageEntitled,
   loadPackageProgress,
+  progressLevel,
+  progressMapKey,
   subscribePackageProgress,
   recordManualLevel,
 } from '../lib/progress-client';
@@ -34,10 +42,14 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   const [localProgress, setLocalProgress] = useState<Record<string, ProgressLevel>>(
     loadLocalProgress,
   );
+  const [manualCache, setManualCache] = useState<Record<string, ProgressLevel>>(
+    readManualProgressCache,
+  );
   const [firebaseMap, setFirebaseMap] = useState<
     Record<string, { watch_count?: number; manual_level?: number; status?: string; resource?: string }>
   >({});
   const [loadingRemote, setLoadingRemote] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const packageId = activeSubDiscipline?.packageId;
   const synced = Boolean(packageId && isSyncedPackage(packageId));
@@ -49,37 +61,44 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(localProgress));
   }, [localProgress]);
 
-  const reloadRemote = useCallback(async () => {
-    if (!synced || !configured || !user || !packageId) {
-      setFirebaseMap({});
-      return;
-    }
+  const syncManualCacheFromMap = useCallback(
+    (map: typeof firebaseMap, pkgId: string) => {
+      setManualCache((prev) => {
+        let next = prev;
+        for (const [key, data] of Object.entries(map)) {
+          const resource = data.resource as ResourceType | undefined;
+          if (!resource || !MANUAL_RESOURCES.includes(resource as 'I' | 'Q')) continue;
+          const slash = key.lastIndexOf('/');
+          if (slash <= 0) continue;
+          const itemKey = key.slice(0, slash);
+          const level = progressLevel(resource, data);
+          next = setManualCachedLevel(next, pkgId, itemKey, resource, level);
+        }
+        writeManualProgressCache(next);
+        return next;
+      });
+    },
+    [],
+  );
 
-    if (!entitled) {
-      setFirebaseMap({});
-      return;
-    }
+  const reloadRemote = useCallback(async () => {
+    if (!synced || !configured || !user || !packageId || !entitled) return;
 
     setLoadingRemote(true);
     try {
       const map = await loadPackageProgress(getFirebaseDb(), user.uid, packageId);
       setFirebaseMap(map);
+      syncManualCacheFromMap(map, packageId);
+      setSaveError(null);
     } catch (err) {
       console.warn('Could not load remote progress:', err);
-      setFirebaseMap({});
     } finally {
       setLoadingRemote(false);
     }
-  }, [synced, configured, user, packageId, entitled]);
+  }, [synced, configured, user, packageId, entitled, syncManualCacheFromMap]);
 
   useEffect(() => {
-    if (!synced || !configured || !user || !packageId) {
-      setFirebaseMap({});
-      setLoadingRemote(false);
-      return;
-    }
-
-    if (!entitled) {
+    if (!synced || !configured || !user || !packageId || !entitled) {
       setFirebaseMap({});
       setLoadingRemote(false);
       return;
@@ -98,19 +117,31 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
           (map) => {
             if (!active) return;
             setFirebaseMap(map);
+            syncManualCacheFromMap(map, packageId);
             setLoadingRemote(false);
+            setSaveError(null);
           },
-          () => {
+          (err) => {
+            console.warn('Progress subscription error:', err);
             if (!active) return;
-            setFirebaseMap({});
-            setLoadingRemote(false);
+            void loadPackageProgress(getFirebaseDb(), user!.uid, packageId)
+              .then((map) => {
+                if (!active) return;
+                setFirebaseMap(map);
+                syncManualCacheFromMap(map, packageId);
+              })
+              .catch((loadErr) => {
+                console.warn('Progress fallback load failed:', loadErr);
+              })
+              .finally(() => {
+                if (active) setLoadingRemote(false);
+              });
           },
         );
       } catch (err) {
         console.warn('Could not subscribe to progress:', err);
         if (!active) return;
-        setFirebaseMap({});
-        setLoadingRemote(false);
+        void reloadRemote();
       }
     })();
 
@@ -126,7 +157,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       unsubscribe?.();
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [synced, configured, user, packageId, entitled, reloadRemote]);
+  }, [synced, configured, user, packageId, entitled, reloadRemote, syncManualCacheFromMap]);
 
   const getLegacyLevel = useCallback(
     (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,
@@ -137,10 +168,18 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
     (itemId: string, resource: ResourceType): ProgressLevel => {
       if (!synced || !packageId) return getLegacyLevel(itemId);
       const firebaseItemKey = toFirebaseItemKey(packageId, itemId);
-      const levels = firebaseMapToCellLevels(firebaseMap, firebaseItemKey);
-      return levels[resource];
+      const mapKey = progressMapKey(firebaseItemKey, resource);
+      const remoteData = firebaseMap[mapKey] ?? {};
+      const remoteLevel = progressLevel(resource, { ...remoteData, resource });
+
+      if (!MANUAL_RESOURCES.includes(resource as 'I' | 'Q')) {
+        return remoteLevel;
+      }
+
+      const cached = getManualCachedLevel(manualCache, packageId, firebaseItemKey, resource);
+      return Math.max(remoteLevel, cached ?? 0) as ProgressLevel;
     },
-    [synced, packageId, firebaseMap, getLegacyLevel],
+    [synced, packageId, firebaseMap, manualCache, getLegacyLevel],
   );
 
   const cycleLegacyItem = useCallback((itemId: string) => {
@@ -158,15 +197,24 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       const firebaseItemKey = toFirebaseItemKey(packageId, itemId);
       const current = getResourceLevel(itemId, resource);
       const next = ((current + 1) % 4) as ProgressLevel;
+      const mapKey = progressMapKey(firebaseItemKey, resource);
+
+      setManualCache((prev) => {
+        const updated = setManualCachedLevel(prev, packageId, firebaseItemKey, resource, next);
+        writeManualProgressCache(updated);
+        return updated;
+      });
 
       setFirebaseMap((prev) => ({
         ...prev,
-        [`${firebaseItemKey}/${resource}`]: {
-          ...(prev[`${firebaseItemKey}/${resource}`] ?? {}),
+        [mapKey]: {
+          ...(prev[mapKey] ?? {}),
           manual_level: next,
           resource,
         },
       }));
+
+      setSaveError(null);
 
       try {
         await recordManualLevel(
@@ -178,11 +226,13 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
           next,
         );
       } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Could not save manual progress';
         console.warn('Could not save manual progress:', err);
-        void reloadRemote();
+        setSaveError(message);
       }
     },
-    [synced, packageId, user, entitled, getResourceLevel, reloadRemote],
+    [synced, packageId, user, entitled, getResourceLevel],
   );
 
   const resetLocalAll = useCallback(() => {
@@ -229,6 +279,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
     synced,
     loadingRemote,
     canEditRemote: entitled,
+    saveError,
     getLegacyLevel,
     getResourceLevel,
     cycleLegacyItem,

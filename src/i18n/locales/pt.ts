@@ -35,6 +35,8 @@ export const pt: Translations = {
     loadingProgress: 'A carregar o teu progresso…',
     noEntitlement:
       'Este pacote não está activo na tua conta. O progresso fica só de leitura até comprares acesso.',
+    saveProgressError:
+      'Não foi possível sincronizar esta alteração. A tua classificação ficou guardada neste dispositivo — abre A minha conta → O meu progresso para actualizar a sessão.',
     noEntitledPackages:
       'Nenhum pacote activo na tua conta. Inicia sessão com o email da compra ou abre A minha conta na Studio9.',
     placeholder:

@@ -143,23 +143,29 @@ export async function recordManualLevel(
   resource: 'I' | 'Q',
   level: ProgressLevel,
 ): Promise<ProgressLevel> {
-  const safeLevel = Math.min(3, Math.max(0, level)) as ProgressLevel;
+  const safeLevel = Math.min(MAX_PROGRESS_LEVEL, Math.max(0, level)) as ProgressLevel;
   const id = progressDocId(userId, packageId, itemKey, resource);
+  const ref = doc(db, 'progress', id);
 
-  await setDoc(
-    doc(db, 'progress', id),
-    {
-      user_id: userId,
-      package_id: packageId,
-      item_key: itemKey,
-      resource,
-      tracking: 'manual',
-      manual_level: safeLevel,
-      status: safeLevel > 0 ? 'completed' : 'started',
-      updated_at: new Date().toISOString(),
-    },
-    { merge: true },
-  );
+  try {
+    await setDoc(
+      ref,
+      {
+        user_id: userId,
+        package_id: packageId,
+        item_key: itemKey,
+        resource,
+        tracking: 'manual',
+        manual_level: safeLevel,
+        status: safeLevel > 0 ? 'completed' : 'started',
+        updated_at: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not save manual progress';
+    throw new Error(message);
+  }
 
   return safeLevel;
 }

@@ -172,6 +172,7 @@ function AppContent() {
           synced={hybrid.synced}
           loadingRemote={hybrid.loadingRemote}
           canEditRemote={hybrid.canEditRemote}
+          saveError={hybrid.saveError}
           getLegacyLevel={getLocalLevel}
           getResourceLevel={hybrid.getResourceLevel}
           onCycleLegacyItem={cycleItem}

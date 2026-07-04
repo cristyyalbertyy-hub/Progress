@@ -527,7 +527,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .subchapter-panel-header {
@@ -596,27 +596,34 @@ body {
 
 .subchapter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 0.75rem;
   padding: 1rem 1.75rem 1.25rem;
 }
 
 .subchapter-tile {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
   background: #f8f6f2;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.85rem;
-  min-height: 76px;
+  min-height: auto;
 }
 
 .subchapter-tile-label {
   font-size: 0.85rem;
   font-weight: 500;
   line-height: 1.35;
+}
+
+.subchapter-tile-resources {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
 }
 
 /* Onboarding (inside progress panel) */
@@ -908,12 +915,12 @@ body {
 }
 
 .resource-legend-row {
-  display: grid;
-  grid-template-columns: repeat(4, 22px);
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.45rem;
-  justify-content: end;
+  justify-content: flex-start;
   margin: 0 0 0.35rem;
-  padding-right: 0.15rem;
+  padding: 0 1.75rem;
 }
 
 .resource-legend-label {
@@ -923,12 +930,14 @@ body {
   text-transform: uppercase;
   text-align: center;
   color: #68645f;
+  min-width: 22px;
 }
 
 .resource-progress-row {
-  display: grid;
-  grid-template-columns: repeat(4, 22px);
+  display: flex;
+  flex-wrap: nowrap;
   gap: 0.45rem;
+  align-items: center;
 }
 
 .progress-square--readonly {

@@ -35,6 +35,8 @@ export const fr: Translations = {
     loadingProgress: 'Chargement de votre progression…',
     noEntitlement:
       'Ce package n\'est pas actif sur votre compte. Progression en lecture seule jusqu\'à l\'achat.',
+    saveProgressError:
+      'Impossible de synchroniser ce changement. Votre évaluation est enregistrée sur cet appareil — ouvrez Mon compte → Ma progression pour actualiser la session.',
     noEntitledPackages:
       'Aucun package actif sur votre compte. Connectez-vous avec l\'email d\'achat ou ouvrez Mon compte sur Studio9.',
     placeholder:

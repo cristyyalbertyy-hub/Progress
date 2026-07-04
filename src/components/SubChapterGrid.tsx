@@ -81,28 +81,30 @@ export function SubChapterGrid({
                     {tSubchapter(item.id)}
                   </span>
                   {synced ? (
-                    <div className="resource-progress-row">
-                      {RESOURCE_TYPES.map((resource) => {
-                        const level = getResourceLevel(item.id, resource);
-                        const auto = AUTO_RESOURCES.includes(resource);
-                        return (
-                          <ProgressSquare
-                            key={resource}
-                            level={level}
-                            readOnly={auto || !canEditManual}
-                            title={`${tr.resources[resource]}: ${tr.progress[level]}`}
-                            onClick={
-                              auto || !canEditManual
-                                ? undefined
-                                : () =>
-                                    onCycleManualResource(
-                                      item.id,
-                                      resource as 'I' | 'Q',
-                                    )
-                            }
-                          />
-                        );
-                      })}
+                    <div className="subchapter-tile-resources">
+                      <div className="resource-progress-row">
+                        {RESOURCE_TYPES.map((resource) => {
+                          const level = getResourceLevel(item.id, resource);
+                          const auto = AUTO_RESOURCES.includes(resource);
+                          return (
+                            <ProgressSquare
+                              key={resource}
+                              level={level}
+                              readOnly={auto || !canEditManual}
+                              title={`${tr.resources[resource]}: ${tr.progress[level]}`}
+                              onClick={
+                                auto || !canEditManual
+                                  ? undefined
+                                  : () =>
+                                      onCycleManualResource(
+                                        item.id,
+                                        resource as 'I' | 'Q',
+                                      )
+                              }
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <ProgressSquare

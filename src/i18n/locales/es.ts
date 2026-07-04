@@ -35,6 +35,8 @@ export const es: Translations = {
     loadingProgress: 'Cargando tu progreso…',
     noEntitlement:
       'Este paquete no está activo en tu cuenta. El progreso es de solo lectura hasta que compres acceso.',
+    saveProgressError:
+      'No se pudo sincronizar este cambio. Tu valoración quedó guardada en este dispositivo — abre Mi cuenta → Mi progreso para actualizar la sesión.',
     noEntitledPackages:
       'No hay paquetes activos en tu cuenta. Inicia sesión con el email de la compra o abre Mi cuenta en Studio9.',
     placeholder:

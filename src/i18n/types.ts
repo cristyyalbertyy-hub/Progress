@@ -26,6 +26,7 @@ export interface Translations {
     refreshEntitlements: string;
     loadingProgress: string;
     noEntitlement: string;
+    saveProgressError: string;
     noEntitledPackages: string;
     placeholder: string;
     chapters: string;

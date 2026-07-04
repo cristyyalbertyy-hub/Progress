@@ -15,6 +15,7 @@ interface ContentPanelProps {
   synced: boolean;
   loadingRemote: boolean;
   canEditRemote: boolean;
+  saveError?: string | null;
   getLegacyLevel: (itemId: string) => ProgressLevel;
   getResourceLevel: (itemId: string, resource: ResourceType) => ProgressLevel;
   onCycleLegacyItem: (itemId: string) => void;
@@ -33,6 +34,7 @@ export function ContentPanel({
   synced,
   loadingRemote,
   canEditRemote,
+  saveError,
   getLegacyLevel,
   getResourceLevel,
   onCycleLegacyItem,
@@ -89,6 +91,9 @@ export function ContentPanel({
           )}
           {synced && !loadingRemote && !canEditRemote && (
             <p className="sync-status sync-status--warn">{tr.ui.noEntitlement}</p>
+          )}
+          {synced && saveError && (
+            <p className="sync-status sync-status--warn">{tr.ui.saveProgressError}</p>
           )}
           <ProgressHeader subDiscipline={subDiscipline} progress={progress} synced={synced} />
           <OnboardingBanner compact subDiscipline={subDiscipline} />
