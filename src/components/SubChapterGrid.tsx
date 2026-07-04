@@ -37,19 +37,7 @@ export function SubChapterGrid({
   return (
     <div className="subchapter-panel">
       <header className="subchapter-panel-header">
-        <div className="subchapter-panel-title-row">
-          <h2 className="subchapter-panel-title">{tSubject(subDiscipline.id)}</h2>
-          {subDiscipline.packageUrl && (
-            <a
-              className="package-link"
-              href={subDiscipline.packageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {tr.ui.openPackage}
-            </a>
-          )}
-        </div>
+        <h2 className="subchapter-panel-title">{tSubject(subDiscipline.id)}</h2>
         <p className="subchapter-panel-meta">
           {chapterCount}{' '}
           {chapterCount === 1 ? tr.ui.chapter : tr.ui.chapters} ·{' '}
