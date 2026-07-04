@@ -327,6 +327,15 @@ export function countSubDisciplineItems(subDiscipline: SubDiscipline): number {
   return getAllItemIds(subDiscipline).length;
 }
 
+/** Percentage for point-based synced progress (shows ≥1% when any points exist). */
+export function percentFromPoints(points: number, maxPoints: number): number {
+  if (maxPoints <= 0 || points <= 0) return 0;
+  const raw = (points / maxPoints) * 100;
+  const rounded = Math.round(raw);
+  if (rounded === 0) return 1;
+  return Math.min(100, rounded);
+}
+
 export function calcProgress(
   itemIds: string[],
   progress: Record<string, ProgressLevel>,
@@ -341,6 +350,6 @@ export function calcProgress(
   const maxPoints = itemCount * 3;
   const points = itemIds.reduce((sum, id) => sum + (progress[id] ?? 0), 0);
   const consolidated = itemIds.filter((id) => (progress[id] ?? 0) === 3).length;
-  const percent = maxPoints === 0 ? 0 : Math.round((points / maxPoints) * 100);
+  const percent = percentFromPoints(points, maxPoints);
   return { points, maxPoints, consolidated, itemCount, percent };
 }

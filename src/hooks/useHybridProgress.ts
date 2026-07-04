@@ -16,6 +16,7 @@ import {
   setManualCachedLevel,
   writeManualProgressCache,
 } from '../lib/manualProgressCache';
+import { notifyManualProgressChanged } from './useRemoteProgressCache';
 import {
   isPackageEntitled,
   loadPackageProgress,
@@ -202,6 +203,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       setManualCache((prev) => {
         const updated = setManualCachedLevel(prev, packageId, firebaseItemKey, resource, next);
         writeManualProgressCache(updated);
+        notifyManualProgressChanged();
         return updated;
       });
 
