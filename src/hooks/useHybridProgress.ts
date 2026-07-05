@@ -9,20 +9,13 @@ import {
   type ResourceType,
 } from '../data/packageProgress';
 import { useAuth } from '../context/AuthContext';
+import { useProgressSync } from '../context/ProgressSyncContext';
 import { getFirebaseDb } from '../lib/firebase';
-import {
-  getManualCachedLevel,
-  readManualProgressCache,
-  setManualCachedLevel,
-  writeManualProgressCache,
-} from '../lib/manualProgressCache';
-import { notifyManualProgressChanged } from './useRemoteProgressCache';
+import { getManualCachedLevel } from '../lib/manualProgressCache';
 import {
   isPackageEntitled,
-  loadPackageProgress,
   progressLevel,
   progressMapKey,
-  subscribePackageProgress,
   recordManualLevel,
 } from '../lib/progress-client';
 
@@ -39,17 +32,19 @@ function loadLocalProgress(): Record<string, ProgressLevel> {
 }
 
 export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
-  const { user, configured, entitledPackageIds } = useAuth();
+  const { user, entitledPackageIds } = useAuth();
+  const {
+    manualCache,
+    getPackageMap,
+    isLoadingPackage,
+    reloadPackage,
+    applyOptimisticCell,
+    setManualLevelOptimistic,
+  } = useProgressSync();
+
   const [localProgress, setLocalProgress] = useState<Record<string, ProgressLevel>>(
     loadLocalProgress,
   );
-  const [manualCache, setManualCache] = useState<Record<string, ProgressLevel>>(
-    readManualProgressCache,
-  );
-  const [firebaseMap, setFirebaseMap] = useState<
-    Record<string, { watch_count?: number; manual_level?: number; status?: string; resource?: string }>
-  >({});
-  const [loadingRemote, setLoadingRemote] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const packageId = activeSubDiscipline?.packageId;
@@ -57,108 +52,17 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   const entitled = Boolean(
     packageId && isPackageEntitled(entitledPackageIds, packageId),
   );
+  const firebaseMap = packageId ? getPackageMap(packageId) : {};
+  const loadingRemote = Boolean(packageId && isLoadingPackage(packageId));
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(localProgress));
   }, [localProgress]);
 
-  const syncManualCacheFromMap = useCallback(
-    (map: typeof firebaseMap, pkgId: string) => {
-      setManualCache((prev) => {
-        let next = prev;
-        for (const [key, data] of Object.entries(map)) {
-          const resource = data.resource as ResourceType | undefined;
-          if (!resource || !MANUAL_RESOURCES.includes(resource as 'I' | 'Q')) continue;
-          const slash = key.lastIndexOf('/');
-          if (slash <= 0) continue;
-          const itemKey = key.slice(0, slash);
-          const level = progressLevel(resource, data);
-          next = setManualCachedLevel(next, pkgId, itemKey, resource, level);
-        }
-        writeManualProgressCache(next);
-        return next;
-      });
-    },
-    [],
-  );
-
   const reloadRemote = useCallback(async () => {
-    if (!synced || !configured || !user || !packageId) return;
-
-    setLoadingRemote(true);
-    try {
-      const map = await loadPackageProgress(getFirebaseDb(), user.uid, packageId);
-      setFirebaseMap(map);
-      syncManualCacheFromMap(map, packageId);
-      setSaveError(null);
-    } catch (err) {
-      console.warn('Could not load remote progress:', err);
-    } finally {
-      setLoadingRemote(false);
-    }
-  }, [synced, configured, user, packageId, syncManualCacheFromMap]);
-
-  useEffect(() => {
-    if (!synced || !configured || !user || !packageId) {
-      setFirebaseMap({});
-      setLoadingRemote(false);
-      return;
-    }
-
-    let active = true;
-    let unsubscribe: (() => void) | undefined;
-    setLoadingRemote(true);
-
-    void (async () => {
-      try {
-        unsubscribe = subscribePackageProgress(
-          getFirebaseDb(),
-          user.uid,
-          packageId,
-          (map) => {
-            if (!active) return;
-            setFirebaseMap(map);
-            syncManualCacheFromMap(map, packageId);
-            setLoadingRemote(false);
-            setSaveError(null);
-          },
-          (err) => {
-            console.warn('Progress subscription error:', err);
-            if (!active) return;
-            void loadPackageProgress(getFirebaseDb(), user!.uid, packageId)
-              .then((map) => {
-                if (!active) return;
-                setFirebaseMap(map);
-                syncManualCacheFromMap(map, packageId);
-              })
-              .catch((loadErr) => {
-                console.warn('Progress fallback load failed:', loadErr);
-              })
-              .finally(() => {
-                if (active) setLoadingRemote(false);
-              });
-          },
-        );
-      } catch (err) {
-        console.warn('Could not subscribe to progress:', err);
-        if (!active) return;
-        void reloadRemote();
-      }
-    })();
-
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        void reloadRemote();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisible);
-
-    return () => {
-      active = false;
-      unsubscribe?.();
-      document.removeEventListener('visibilitychange', onVisible);
-    };
-  }, [synced, configured, user, packageId, reloadRemote, syncManualCacheFromMap]);
+    if (!synced || !packageId) return;
+    await reloadPackage(packageId);
+  }, [synced, packageId, reloadPackage]);
 
   const getLegacyLevel = useCallback(
     (itemId: string): ProgressLevel => localProgress[itemId] ?? 0,
@@ -200,21 +104,13 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
       const next = ((current + 1) % 4) as ProgressLevel;
       const mapKey = progressMapKey(firebaseItemKey, resource);
 
-      setManualCache((prev) => {
-        const updated = setManualCachedLevel(prev, packageId, firebaseItemKey, resource, next);
-        writeManualProgressCache(updated);
-        notifyManualProgressChanged();
-        return updated;
-      });
+      setManualLevelOptimistic(packageId, firebaseItemKey, resource, next);
 
-      setFirebaseMap((prev) => ({
-        ...prev,
-        [mapKey]: {
-          ...(prev[mapKey] ?? {}),
-          manual_level: next,
-          resource,
-        },
-      }));
+      applyOptimisticCell(packageId, mapKey, {
+        ...(firebaseMap[mapKey] ?? {}),
+        manual_level: next,
+        resource,
+      });
 
       setSaveError(null);
 
@@ -234,7 +130,16 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
         setSaveError(message);
       }
     },
-    [synced, packageId, user, entitled, getResourceLevel],
+    [
+      synced,
+      packageId,
+      user,
+      entitled,
+      getResourceLevel,
+      firebaseMap,
+      setManualLevelOptimistic,
+      applyOptimisticCell,
+    ],
   );
 
   const resetLocalAll = useCallback(() => {

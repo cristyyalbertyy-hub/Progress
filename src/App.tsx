@@ -11,7 +11,7 @@ import {
 } from './data/course';
 import { isSyncedPackage, packageIdForSub } from './data/packageProgress';
 import { useHybridProgress } from './hooks/useHybridProgress';
-import { useRemoteProgressCache } from './hooks/useRemoteProgressCache';
+import { useProgressSync } from './context/ProgressSyncContext';
 import { useProgress } from './hooks/useProgress';
 import { getProgressReturnUrl } from './lib/returnUrl';
 import './App.css';
@@ -56,7 +56,7 @@ function AppContent() {
   const { entitledPackageIds, user } = useAuth();
   const { progress: localProgress, cycleItem, resetAll, getLevel: getLocalLevel } =
     useProgress();
-  const { summaryForSub } = useRemoteProgressCache();
+  const { summaryForSub } = useProgressSync();
 
   const [activeSubDisciplineId, setActiveSubDisciplineId] = useState<string | null>(
     null,
