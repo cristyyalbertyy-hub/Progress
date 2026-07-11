@@ -180,7 +180,7 @@ const chemistryBiochemistryChapters: Chapter[] = [
 const historyOfMedicineChapters: Chapter[] = [
   chapter('ancient', ['af-mag', 'af-hrm', 'af-thm', 'af-ari']),
   chapter('scientific', ['sa-sre', 'sa-ves', 'sa-har', 'sa-fle']),
-  chapter('public-health', ['ph-jen', 'ph-sem', 'ph-mge', 'ph-sno']),
+  chapter('public-health', ['ph-jen', 'ph-sem', 'ph-mge']),
 ];
 
 const moralPhilosophyChapters: Chapter[] = [
