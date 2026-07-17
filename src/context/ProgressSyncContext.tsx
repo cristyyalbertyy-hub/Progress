@@ -13,6 +13,7 @@ import {
   isSyncedPackage,
   MANUAL_RESOURCES,
   RESOURCE_TYPES,
+  SYNCED_PACKAGE_IDS,
   toFirebaseItemKey,
   type ResourceType,
 } from '../data/packageProgress';
@@ -31,7 +32,7 @@ import {
   subscribePackageProgress,
 } from '../lib/progress-client';
 
-const SYNCED_PACKAGE_IDS = ['medical-biology', 'genetics'] as const;
+
 const MANUAL_PROGRESS_EVENT = 'studio9-manual-progress';
 
 export type FirebaseProgressMap = Record<

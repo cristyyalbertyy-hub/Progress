@@ -197,7 +197,16 @@ export async function loadActiveEntitlements(
     console.warn('Entitlements query failed:', err);
   }
 
-  for (const packageId of ['medical-biology', 'genetics']) {
+  for (const packageId of [
+    'medical-biology',
+    'genetics',
+    'histology',
+    'embryology',
+    'histology-embryology',
+    'chemistry',
+    'introductory-biochemistry',
+    'chemistry-introductory-biochemistry',
+  ]) {
     try {
       const snap = await getDoc(doc(db, 'entitlements', `${userId}_${packageId}`));
       if (snap.exists()) collect(snap.data());

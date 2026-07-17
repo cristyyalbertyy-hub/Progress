@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ProgressLevel, SubDiscipline } from '../data/course';
 import {
   isSyncedPackage,
+  isPackageEntitledForSub,
   MANUAL_RESOURCES,
   progressCellKey,
   RESOURCE_TYPES,
@@ -13,7 +14,6 @@ import { useProgressSync } from '../context/ProgressSyncContext';
 import { getFirebaseDb } from '../lib/firebase';
 import { getManualCachedLevel } from '../lib/manualProgressCache';
 import {
-  isPackageEntitled,
   progressLevel,
   progressMapKey,
   recordManualLevel,
@@ -50,7 +50,8 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   const packageId = activeSubDiscipline?.packageId;
   const synced = Boolean(packageId && isSyncedPackage(packageId));
   const entitled = Boolean(
-    packageId && isPackageEntitled(entitledPackageIds, packageId),
+    activeSubDiscipline &&
+      isPackageEntitledForSub(entitledPackageIds, activeSubDiscipline),
   );
   const firebaseMap = packageId ? getPackageMap(packageId) : {};
   const loadingRemote = Boolean(packageId && isLoadingPackage(packageId));

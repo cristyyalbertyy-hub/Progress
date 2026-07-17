@@ -167,14 +167,14 @@ const histologyEmbryologyChapters: Chapter[] = [
 ];
 
 const chemistryBiochemistryChapters: Chapter[] = [
-  chapter('atomic-structure', ['as-api', 'as-qmm', 'as-qno', 'as-cb']),
-  chapter('matter-thermodynamics', ['mt-gigl', 'mt-lvp', 'mt-sc', 'mt-eefe']),
-  chapter('solutions-equilibrium', ['se-cd', 'se-kel', 'se-ec', 'se-lcf']),
-  chapter('electrolytes-kinetics', ['ek-abt', 'ek-pb', 'ek-cp', 'ek-ae', 'ek-rr']),
-  chapter('hydrocarbons', ['h-ch', 'h-ac', 'h-aa', 'h-acb']),
-  chapter('functional-groups', ['fg-apt', 'fg-ak', 'fg-cae', 'fg-amines']),
-  chapter('stereochemistry', ['oc-sc']),
-  chapter('introductory-biochemistry', ['ib-cm', 'ib-ap', 'ib-lsp', 'ib-nbn']),
+  chapter('atomic-structure', ['AS_API', 'AS_QMM', 'AS_QNO', 'AS_CB']),
+  chapter('matter-thermodynamics', ['MT_GIGL', 'MT_LVP', 'MT_SC', 'MT_EEFE']),
+  chapter('solutions-equilibrium', ['SE_CD', 'SE_KEL', 'SE_EC', 'SE_LCF']),
+  chapter('electrolytes-kinetics', ['EK_ABT', 'EK_PB', 'EK_CP', 'EK_AE', 'EK_RR']),
+  chapter('hydrocarbons', ['H_CH', 'H_AC', 'H_AA', 'H_ACB']),
+  chapter('functional-groups', ['FG_APT', 'FG_AK', 'FG_CAE', 'FG_AA']),
+  chapter('stereochemistry', ['OC_SC']),
+  chapter('introductory-biochemistry', ['IB_CM', 'IB_AP', 'IB_LSP', 'IB_NBN']),
 ];
 
 const historyOfMedicineChapters: Chapter[] = [
@@ -200,6 +200,18 @@ const italianHealthSystemChapters: Chapter[] = [
   chapter('supply-structure', ['ihs-ss']),
   chapter('budgeting-costs', ['ihs-bc']),
 ];
+
+const histologyChapters: Chapter[] = histologyEmbryologyChapters.slice(0, 2);
+
+const embryologyChapters: Chapter[] = histologyEmbryologyChapters.slice(2);
+
+const chemistryChapters: Chapter[] = chemistryBiochemistryChapters.filter(
+  (c) => c.id !== 'introductory-biochemistry',
+);
+
+const introductoryBiochemistryChapters: Chapter[] = chemistryBiochemistryChapters.filter(
+  (c) => c.id === 'introductory-biochemistry',
+);
 
 /** One purchasable package = one sidebar row (no curriculum umbrella titles). */
 function packageGroup(sub: SubDiscipline): DisciplineGroup {
@@ -256,16 +268,48 @@ export const disciplineGroups: DisciplineGroup[] = [
     chapters: statisticsChapters,
   }),
   packageGroup({
-    id: 'histology-embryology',
+    id: 'histology',
     number: 7,
+    available: true,
+    packageId: 'histology',
+    packageUrl: 'https://histology-embryology.vercel.app/',
+    chapters: histologyChapters,
+  }),
+  packageGroup({
+    id: 'embryology',
+    number: 8,
+    available: true,
+    packageId: 'embryology',
+    packageUrl: 'https://histology-embryology.vercel.app/',
+    chapters: embryologyChapters,
+  }),
+  packageGroup({
+    id: 'histology-embryology',
+    number: 9,
     available: true,
     packageId: 'histology-embryology',
     packageUrl: 'https://histology-embryology.vercel.app/',
     chapters: histologyEmbryologyChapters,
   }),
   packageGroup({
+    id: 'chemistry',
+    number: 10,
+    available: true,
+    packageId: 'chemistry',
+    packageUrl: 'https://chemistry-roan.vercel.app/',
+    chapters: chemistryChapters,
+  }),
+  packageGroup({
+    id: 'introductory-biochemistry',
+    number: 11,
+    available: true,
+    packageId: 'introductory-biochemistry',
+    packageUrl: 'https://chemistry-roan.vercel.app/',
+    chapters: introductoryBiochemistryChapters,
+  }),
+  packageGroup({
     id: 'chemistry-biochemistry',
-    number: 8,
+    number: 12,
     available: true,
     packageId: 'chemistry-introductory-biochemistry',
     packageUrl: 'https://chemistry-roan.vercel.app/',
@@ -273,7 +317,7 @@ export const disciplineGroups: DisciplineGroup[] = [
   }),
   packageGroup({
     id: 'history-of-medicine',
-    number: 9,
+    number: 13,
     available: true,
     packageId: 'history-of-medicine',
     packageUrl: 'https://history-medicine.vercel.app/',
@@ -281,7 +325,7 @@ export const disciplineGroups: DisciplineGroup[] = [
   }),
   packageGroup({
     id: 'moral-philosophy',
-    number: 10,
+    number: 14,
     available: true,
     packageId: 'moral-philosophy',
     packageUrl: 'https://moral-philosophy.vercel.app/',
@@ -289,7 +333,7 @@ export const disciplineGroups: DisciplineGroup[] = [
   }),
   packageGroup({
     id: 'health-technology-assessments',
-    number: 11,
+    number: 15,
     available: true,
     packageId: 'health-technology-assessments',
     packageUrl: 'https://health-technology-assessments.vercel.app/',
@@ -297,7 +341,7 @@ export const disciplineGroups: DisciplineGroup[] = [
   }),
   packageGroup({
     id: 'italian-health-system',
-    number: 12,
+    number: 16,
     available: true,
     packageId: 'italian-health-system',
     packageUrl: 'https://italian-health-system.vercel.app/',

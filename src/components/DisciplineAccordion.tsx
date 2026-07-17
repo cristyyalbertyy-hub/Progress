@@ -9,6 +9,7 @@ import type { ProgressLevel } from '../data/course';
 import {
   isSubVisibleToStudent,
   isSyncedPackage,
+  isPackageEntitledForSub,
   packageIdForSub,
 } from '../data/packageProgress';
 
@@ -203,7 +204,9 @@ function SubDisciplineBtn({
   const itemIds = getAllItemIds(sub);
   const pkgId = packageIdForSub(sub);
   const synced = isSyncedPackage(pkgId);
-  const entitled = synced ? entitledPackageIds.includes(pkgId) : true;
+  const entitled = synced
+    ? isPackageEntitledForSub(entitledPackageIds, sub)
+    : true;
 
   let progressLabel: string | null = null;
 
