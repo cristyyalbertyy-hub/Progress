@@ -195,12 +195,6 @@ const healthTechnologyAssessmentChapters: Chapter[] = [
   chapter('hta-structure', ['hta-htas']),
 ];
 
-const italianHealthSystemChapters: Chapter[] = [
-  chapter('organization-structure', ['ihs-os']),
-  chapter('supply-structure', ['ihs-ss']),
-  chapter('budgeting-costs', ['ihs-bc']),
-];
-
 const histologyChapters: Chapter[] = histologyEmbryologyChapters.slice(0, 2);
 
 const embryologyChapters: Chapter[] = histologyEmbryologyChapters.slice(2);
@@ -338,14 +332,6 @@ export const disciplineGroups: DisciplineGroup[] = [
     packageId: 'health-technology-assessments',
     packageUrl: 'https://health-technology-assessments.vercel.app/',
     chapters: healthTechnologyAssessmentChapters,
-  }),
-  packageGroup({
-    id: 'italian-health-system',
-    number: 16,
-    available: true,
-    packageId: 'italian-health-system',
-    packageUrl: 'https://italian-health-system.vercel.app/',
-    chapters: italianHealthSystemChapters,
   }),
 ];
 

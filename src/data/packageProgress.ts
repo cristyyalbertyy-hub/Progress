@@ -22,7 +22,6 @@ export const SYNCED_PACKAGE_IDS = [
   'history-of-medicine',
   'moral-philosophy',
   'health-technology-assessments',
-  'italian-health-system',
 ] as const;
 
 /** Partial SKU → parent bundle (hide partial row when bundle is owned). */
@@ -113,12 +112,6 @@ const HTA_ITEM_KEYS: Record<string, string> = {
   'hta-htas': 'HTAS',
 };
 
-const ITALIAN_HEALTH_SYSTEM_ITEM_KEYS: Record<string, string> = {
-  'ihs-os': 'OS',
-  'ihs-ss': 'SS',
-  'ihs-bc': 'BC',
-};
-
 const PACKAGE_ITEM_KEY_MAPS: Record<string, Record<string, string>> = {
   genetics: GENETICS_ITEM_KEYS,
   physics: PHYSICS_ITEM_KEYS,
@@ -126,7 +119,6 @@ const PACKAGE_ITEM_KEY_MAPS: Record<string, Record<string, string>> = {
   'history-of-medicine': HISTORY_OF_MEDICINE_ITEM_KEYS,
   'moral-philosophy': MORAL_PHILOSOPHY_ITEM_KEYS,
   'health-technology-assessments': HTA_ITEM_KEYS,
-  'italian-health-system': ITALIAN_HEALTH_SYSTEM_ITEM_KEYS,
 };
 
 export function toFirebaseItemKey(packageId: string, itemId: string): string {
