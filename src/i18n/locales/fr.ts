@@ -324,7 +324,6 @@ export const fr: Translations = {
     'ph-jen': 'Edward Jenner et vaccins',
     'ph-sem': 'Ignaz Semmelweis',
     'ph-mge': 'Géographie médicale',
-    'ph-sno': 'John Snow et choléra',
     'tf-ms': 'Systèmes moraux',
     'tf-pa': 'Anthropologie philosophique',
     'tf-ser': 'Science et rapport à l\'éthique',

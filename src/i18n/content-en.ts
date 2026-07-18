@@ -264,7 +264,6 @@ export const subchaptersEn = {
   'ph-jen': 'Edward Jenner and Vaccines',
   'ph-sem': 'Ignaz Semmelweis',
   'ph-mge': 'Medical Geography',
-  'ph-sno': 'John Snow and Cholera',
   'tf-ms': 'Moral Systems',
   'tf-pa': 'Philosophical Anthropology',
   'tf-ser': 'Science and Ethics Relationship',
