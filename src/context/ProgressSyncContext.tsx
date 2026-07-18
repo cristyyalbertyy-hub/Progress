@@ -15,6 +15,7 @@ import {
   RESOURCE_TYPES,
   SYNCED_PACKAGE_IDS,
   toFirebaseItemKey,
+  packageIdForSub,
   type ResourceType,
 } from '../data/packageProgress';
 import { useAuth } from './AuthContext';
@@ -272,16 +273,17 @@ export function ProgressSyncProvider({ children }: { children: ReactNode }) {
   const summaryForSub = useCallback(
     (sub: SubDiscipline): SubProgressSummary => {
       const itemIds = sub.chapters.flatMap((c) => c.items.map((i) => i.id));
+      const pkgId = packageIdForSub(sub);
 
-      if (sub.packageId && isSyncedPackage(sub.packageId)) {
-        const map = cache[sub.packageId] ?? {};
+      if (isSyncedPackage(pkgId)) {
+        const map = cache[pkgId] ?? {};
         let consolidated = 0;
         let cells = 0;
         let points = 0;
         for (const itemId of itemIds) {
           for (const resource of RESOURCE_TYPES) {
             cells += 1;
-            const level = cellLevel(sub.packageId, itemId, resource, map, manualCache);
+            const level = cellLevel(pkgId, itemId, resource, map, manualCache);
             points += level;
             if (level >= MAX_PROGRESS_LEVEL) consolidated += 1;
           }

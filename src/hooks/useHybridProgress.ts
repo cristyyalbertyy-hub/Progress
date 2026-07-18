@@ -4,6 +4,7 @@ import {
   isSyncedPackage,
   isPackageEntitledForSub,
   MANUAL_RESOURCES,
+  packageIdForSub,
   progressCellKey,
   RESOURCE_TYPES,
   toFirebaseItemKey,
@@ -47,7 +48,7 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   );
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const packageId = activeSubDiscipline?.packageId;
+  const packageId = activeSubDiscipline ? packageIdForSub(activeSubDiscipline) : undefined;
   const synced = Boolean(packageId && isSyncedPackage(packageId));
   const entitled = Boolean(
     activeSubDiscipline &&
@@ -150,7 +151,8 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   const progressSummary = useCallback(
     (sub: SubDiscipline) => {
       const itemIds = sub.chapters.flatMap((c) => c.items.map((i) => i.id));
-      if (sub.packageId && isSyncedPackage(sub.packageId)) {
+      const pkgId = packageIdForSub(sub);
+      if (isSyncedPackage(pkgId)) {
         let consolidated = 0;
         let cells = 0;
         for (const itemId of itemIds) {
@@ -169,7 +171,9 @@ export function useHybridProgress(activeSubDiscipline?: SubDiscipline) {
   );
 
   const flatProgressForHeader = useCallback((): Record<string, ProgressLevel> => {
-    if (!activeSubDiscipline?.packageId || !isSyncedPackage(activeSubDiscipline.packageId)) {
+    if (!activeSubDiscipline) return localProgress;
+    const pkgId = packageIdForSub(activeSubDiscipline);
+    if (!isSyncedPackage(pkgId)) {
       return localProgress;
     }
     const out: Record<string, ProgressLevel> = {};

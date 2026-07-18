@@ -92,7 +92,7 @@ function AppContent() {
   );
 
   const isActiveSynced = Boolean(
-    activeSubDiscipline?.packageId && isSyncedPackage(activeSubDiscipline.packageId),
+    activeSubDiscipline && isSyncedPackage(packageIdForSub(activeSubDiscipline)),
   );
 
   const handleSelectSubDiscipline = (subId: string) => {

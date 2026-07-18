@@ -1,6 +1,6 @@
 import { useLanguage } from '../context/LanguageContext';
 import { PROGRESS_COLORS } from '../data/course';
-import { isSyncedPackage } from '../data/packageProgress';
+import { isSyncedPackage, packageIdForSub } from '../data/packageProgress';
 import type { SubDiscipline } from '../data/course';
 
 interface OnboardingBannerProps {
@@ -11,7 +11,9 @@ interface OnboardingBannerProps {
 export function OnboardingBanner({ compact = false, subDiscipline }: OnboardingBannerProps) {
   const { tr } = useLanguage();
   const levels = [0, 1, 2, 3] as const;
-  const synced = Boolean(subDiscipline?.packageId && isSyncedPackage(subDiscipline.packageId));
+  const synced = Boolean(
+    subDiscipline && isSyncedPackage(packageIdForSub(subDiscipline)),
+  );
 
   return (
     <section className={`onboarding ${compact ? 'onboarding--compact' : ''}`}>
