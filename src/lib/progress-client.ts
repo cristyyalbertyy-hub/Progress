@@ -12,6 +12,7 @@ import type { ProgressLevel } from '../data/course';
 import {
   AUTO_RESOURCES,
   MANUAL_RESOURCES,
+  SYNCED_PACKAGE_IDS,
   type ResourceType,
 } from '../data/packageProgress';
 
@@ -197,16 +198,7 @@ export async function loadActiveEntitlements(
     console.warn('Entitlements query failed:', err);
   }
 
-  for (const packageId of [
-    'medical-biology',
-    'genetics',
-    'histology',
-    'embryology',
-    'histology-embryology',
-    'chemistry',
-    'introductory-biochemistry',
-    'chemistry-introductory-biochemistry',
-  ]) {
+  for (const packageId of SYNCED_PACKAGE_IDS) {
     try {
       const snap = await getDoc(doc(db, 'entitlements', `${userId}_${packageId}`));
       if (snap.exists()) collect(snap.data());
