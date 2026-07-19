@@ -94,15 +94,12 @@ function cellLevel(
 }
 
 export function ProgressSyncProvider({ children }: { children: ReactNode }) {
-  const { user, configured, entitledPackageIds } = useAuth();
+  const { user, configured } = useAuth();
   const [cache, setCache] = useState<Record<string, FirebaseProgressMap>>({});
   const [manualCache, setManualCache] = useState(readManualProgressCache);
   const [loadingPackages, setLoadingPackages] = useState<Record<string, boolean>>({});
 
-  const syncedPackageIds = useMemo(() => {
-    const entitledSynced = entitledPackageIds.filter((id) => isSyncedPackage(id));
-    return entitledSynced.length > 0 ? entitledSynced : [...SYNCED_PACKAGE_IDS];
-  }, [entitledPackageIds]);
+  const syncedPackageIds = useMemo(() => [...SYNCED_PACKAGE_IDS], []);
 
   const setPackageLoading = useCallback((packageId: string, loading: boolean) => {
     setLoadingPackages((prev) => {
